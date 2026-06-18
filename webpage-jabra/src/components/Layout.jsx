@@ -1,8 +1,8 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, Link } from 'react-router-dom'
 import { supabase } from '../supabase-client'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Login from './Login'
+import logo from '../assets/logo_jan.png'
 
 export default function Layout() {
     const [session, setSession] = useState(null)
@@ -34,12 +34,24 @@ export default function Layout() {
         ) : (
             <button onClick={() => navigate('/login')}>Login</button>
         )}
-        <div className='layout'>
+        <div className='layout-container'>
             <header className='layout-header'>
-
+                <img src={logo} alt="Logo" onClick={() => navigate('/')} />
+                <nav className='layout-header-nav'>
+                   <Link to="/">Home</Link>
+                   <Link to="/about">About</Link>
+                   {session ? (
+                    <button onClick={handleLogout}>Logout</button>
+                   ) : (
+                    <>
+                        <Link to="/login">Login</Link>
+                        <Link to="/signup">Signup</Link>
+                    </>
+                   )}
+                </nav>
             </header>
         </div>
-        <main>
+        <main className='layout-main'>
             <Outlet />
         </main>
         <footer className='layout-footer'>
