@@ -1,4 +1,4 @@
-# Projektdokumentation
+# Projektdokumentation – Sportler Webapplikation mit Strava-Integration
 
 **Modul**: 210
 **Projekt:** Public Cloud
@@ -28,29 +28,43 @@
 
 ## 1. Einleitung
 
+Der Auftraggeber ist ein junger Ausdauersportler, der seine Trainings und Wettkämpfe dokumentieren und für Interessierte öffentlich zugänglich machen möchte.
+
 ### 1.1 Ausgangslage
 
-Ein junger Sportler verwaltet seine Trainings und Wettkämpfe aktuell über verschiedene Plattformen. Trainingsdaten werden über Strava erfasst, während die Wettkampfplanung und -vorbereitung an verschiedenen anderen Orten gespeichert werden. Es entsteht ein hoher Verwaltungsaufwand welcher potenzielle Trainingszeit kostet.
+Trainingsdaten werden über verschiedene Garmin Geräte erfasst und über die Plattform Strava für andere Sportbegeisterte zur Verfügung gestellt. Informationen zu Wettkämpfen, Trainingsplänen und persönlichen Leistungen sind jedoch nicht öffentlich und  zentral verfügbar. Dadurch entsteht ein erhöhter Verwaltungsaufwand und Sponsoren, Freunde, Familie und Fans erhalten keinen strukturierten Überblick über aktuelle Aktivitäten und geplante Wettkämpfe.
 
 ### 1.2 Projektziel
 
-Ziel des Projektes ist die Entwicklung einer Fullstack-Webapplikation, welche Trainingsdaten und Wettkampfplanung zentral verwaltet und vereint. Die Anwendung soll Trainingsdate aus Strava integrieren und unterschiedliche Benutzerrollen unterstützen.
+Ziel des Projekts ist die Entwicklung einer Fullstack-Webapplikation mit folgenden Funktionen:
+
+* Öffentliche Anzeige von Trainings und Wettkämpfen
+* Benutzerregistrierung und Authentifizierung
+* Rollenbasierte Zugriffssteuerung
+* Verwaltung von Trainings- und Wettkampfdaten
+* Integration der Strava API zur Übernahme von Trainingsdaten
+* Responsives Design für Desktop und mobile Geräte
 
 ### 1.3 Projektabgrenzung
 
-**Im Projekt enthalten**
+**Bestandteile des Projekts**
 
-- Registrierung und Login
-- Rollenverwaltung
-- Anzeige von Trainings und Wettkämpfen
-- Verwaltung von Trainings- und Raceplan-Einträgen
-- Strava-Integration
+* Entwicklung einer Webapplikation mit React
+* Backend mit Supabase (Datenbank, Authentifizierung und Storage)
+* Strava-OAuth-Authentifizierung
+* Strava-Webhook-Integration zur Synchronisierung von Aktivitäten
+* Rollenmodell (Gast, Benutzer, Sportler)
+* CRUD-Funktionen für Trainings und Wettkämpfe
+* Responsives Webdesign für Desktop und Mobile
 
-**Nicht Bestandteil**
+**Nicht Bestandteil des Projekts**
 
-- Mobile App
-- Mehrsprachigkeit
-- Zahlungsfunktion (Sponsoring)
+* Entwicklung einer nativen Mobile-App
+* Mehrsprachigkeit
+* Social-Media-Funktionen (Kommentare, Likes, Teilen)
+* Push-Benachrichtigungen
+* Sponsoring- oder Zahlungsfunktionen
+* Administrationsbereich für mehrere Sportler
 
 ---
 
