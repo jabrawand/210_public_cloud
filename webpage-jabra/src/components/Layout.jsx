@@ -40,6 +40,7 @@ export default function Layout() {
                 <nav className='layout-header-nav'>
                    <Link to="/">Home</Link>
                    <Link to="/about">About</Link>
+                   <Link to="/raceplan">Raceplan</Link>
                    {session ? (
                     <button onClick={handleLogout}>Logout</button>
                    ) : (
