@@ -1,0 +1,214 @@
+.activity-details-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    width: 100%;
+    padding: 2rem 1rem 3rem;
+    box-sizing: border-box;
+}
+
+.activity-details-title {
+    margin: 0 0 2rem;
+    font-family: var(--font-heading);
+    font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--primary-text-color);
+    text-align: center;
+}
+
+.activity-details-layout {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: 1.25rem;
+    width: min(100%, 1100px);
+    align-items: start;
+}
+
+.activity-details-back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-top: 1.5rem;
+    border-radius: 50%;
+    border: 1px solid var(--contact-muted);
+    background-color: var(--secondary-bg);
+    color: var(--primary-text-color);
+    text-decoration: none;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.activity-details-back-btn:hover {
+    background-color: var(--accent);
+    color: var(--primary-bg);
+}
+
+.activity-details-info-card,
+.activity-details-map-card {
+    border: 1px solid var(--contact-muted);
+    border-radius: 0.75rem;
+    background-color: var(--secondary-bg);
+    overflow: hidden;
+}
+
+.activity-details-info-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.activity-details-profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.activity-details-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background-color: rgba(204, 224, 224, 0.15);
+    color: var(--primary-text-color);
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-bold);
+    flex-shrink: 0;
+}
+
+.activity-details-profile-text {
+    min-width: 0;
+}
+
+.activity-details-athlete-name {
+    margin: 0 0 0.25rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-text-color);
+}
+
+.activity-details-meta {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--contact-muted);
+    line-height: 1.4;
+}
+
+.activity-details-sport-icon {
+    margin-right: 0.35rem;
+}
+
+.activity-details-activity-name {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-text-color);
+}
+
+.activity-details-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem 1.5rem;
+}
+
+.activity-details-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.activity-details-stat-label {
+    font-size: 0.75rem;
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--contact-muted);
+}
+
+.activity-details-stat-value {
+    font-size: 1.125rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-text-color);
+}
+
+.activity-details-strava-link {
+    margin-top: auto;
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.activity-details-strava-link:hover {
+    color: var(--primary-text-color);
+}
+
+.activity-details-map-card {
+    min-height: 420px;
+}
+
+.activity-details-map,
+.activity-details-map-empty {
+    width: 100%;
+    height: 100%;
+    min-height: 420px;
+}
+
+.activity-details-map-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--contact-muted);
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.activity-details-back {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    color: var(--contact-muted);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.activity-details-back:hover {
+    color: var(--accent);
+}
+
+.activity-details-loading,
+.activity-details-error {
+    color: var(--contact-muted);
+    text-align: center;
+}
+
+@media (max-width: 900px) {
+    .activity-details-layout {
+        grid-template-columns: auto 1fr;
+    }
+
+    .activity-details-map-card {
+        grid-column: 1 / -1;
+    }
+
+    .activity-details-back-btn {
+        margin-top: 0;
+    }
+
+    .activity-details-map-card,
+    .activity-details-map,
+    .activity-details-map-empty {
+        min-height: 320px;
+    }
+}
+
+@media (max-width: 540px) {
+    .activity-details-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}

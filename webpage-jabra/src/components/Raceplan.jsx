@@ -1,6 +1,7 @@
 import React from 'react'
 import { supabase } from '../supabase-client'
 import { useState, useEffect } from 'react'
+import '../css/Raceplan.css'
 
 async function getRaces() {
     const { data, error } = await supabase.from('races').select('*')
@@ -9,10 +10,6 @@ async function getRaces() {
         return []
     }
     return data
-}
-
-const handleRaceClick = (race) => {
-
 }
 
 export default function Raceplan() {
@@ -35,23 +32,31 @@ export default function Raceplan() {
             <div className='raceplan-section-content'>
                 <h1 className='raceplan-section-title'>Raceplan</h1>
                 <ul className='raceplan-section-grid'>
-                    {races.map((race) => (
-                        <div
-                        key={race.id}
-                        className='raceplan-section-card'
-                        onClick={() => toggleRace(race.id)}
-                        >
-                            <h3 className='raceplan-section-card-title'>{race.name}</h3>
-                            {expandedRace === race.id && (
-                                <>
-                                    <p>{race.race_date}</p>
-                                    <p>{race.location} ({race.country_code})</p>
-                                    <p>{race.distance}</p>
-                                    <a href={race.event_url} target='_blank' rel='noopener noreferrer'>{race.event_url}</a>
-                                </>
-                            )}
-                        </div>
-                    ))}
+                    {races.map((race) => {
+                        const isExpanded = expandedRace === race.id
+                        return (
+                            <div
+                                key={race.id}
+                                className={`raceplan-section-card${isExpanded ? ' raceplan-section-card--expanded' : ''}`}
+                                onClick={() => toggleRace(race.id)}
+                            >
+                                <div className='raceplan-section-card-header'>
+                                    <h3>
+                                        {race.name}
+                                        {isExpanded ? ' ▲' : ' ▼'}
+                                    </h3>
+                                </div>
+                                {isExpanded && (
+                                    <div className='raceplan-section-card-details'>
+                                        <p>{race.race_date}</p>
+                                        <p>{race.location} ({race.country_code})</p>
+                                        <p>{race.distance}</p>
+                                        <a href={race.event_url} target='_blank' rel='noopener noreferrer'>{race.event_url}</a>
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    })}
                 </ul>
             </div>
         </div>
