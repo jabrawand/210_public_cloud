@@ -1,21 +1,26 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase-client'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 
 export default function Login() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
+    const navigate = useNavigate()
+    const location = useLocation()
+    const redirectTo = location.state?.from?.pathname || '/'
 
     useEffect(() => {
-        supabase.auth.onAuthStateChange((event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
             if (event === 'SIGNED_IN') {
-                window.location.href = '/'
+                navigate(redirectTo, { replace: true })
             }
         })
-    }, [])
+
+        return () => subscription.unsubscribe()
+    }, [navigate, redirectTo])
 
     const handleLogin = async (e) => {
         e.preventDefault()

@@ -53,6 +53,17 @@
     margin: -0.75rem 0 1.5rem;
 }
 
+.activities-section-status {
+    text-align: center;
+    color: var(--contact-muted);
+    font-size: 0.9375rem;
+    margin: 0 0 1.5rem;
+}
+
+.activities-section-status--error {
+    color: var(--accent);
+}
+
 .activities-section-grid {
     display: flex;
     flex-direction: column;

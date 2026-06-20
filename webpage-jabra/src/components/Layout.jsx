@@ -1,46 +1,27 @@
 import { Outlet, Link } from 'react-router-dom'
 import { supabase } from '../supabase-client'
-import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import logo from '../assets/logo_jan.png'
+import '../css/Layout.css'
 
 export default function Layout() {
-    const [session, setSession] = useState(null)
+    const { session } = useAuth()
     const navigate = useNavigate()
 
-    const fetchSession = async () => {
-        const currentSession = await supabase.auth.getSession();
-        console.log(currentSession);
-        setSession(currentSession.data.session);
-    };
-    
-    useEffect(() => {
-        fetchSession();
-    }, []);
-
-    /** Handle Logout */
     const handleLogout = async () => {
-        await supabase.auth.signOut();
-        setSession(null);
-    };
+        await supabase.auth.signOut()
+    }
 
     return (
-        <>
-        {session ? (
-            <div>
-                <button onClick={handleLogout}>Logout</button>
-                <p>Wilkommen, {session.user.email}</p>
-            </div>
-        ) : (
-            <button onClick={() => navigate('/login')}>Login</button>
-        )}
-        <div className='layout-container'>
-            <header className='layout-header'>
-                <img src={logo} alt="Logo" onClick={() => navigate('/')} />
+        <div className="layout-container">
+            <header className="layout-header">
+                <img src={logo} alt="Logo" onClick={() => navigate('/')} className='layout-header-logo' />
                 <nav className='layout-header-nav'>
                    <Link to="/">Home</Link>
                    <Link to="/about">About</Link>
                    <Link to="/raceplan">Raceplan</Link>
+                   <Link to="/activities">Activities</Link>
                    {session ? (
                     <button onClick={handleLogout}>Logout</button>
                    ) : (
@@ -51,13 +32,33 @@ export default function Layout() {
                    )}
                 </nav>
             </header>
+            <main className="layout-main">
+                <Outlet />
+            </main>
+            <div className="footer-area">
+                <svg className="footer-wave-svg" viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        className="wave-fill"
+                        d="M0,64 C240,128 480,0 720,64 C960,128 1200,0 1440,64 L1440,120 L0,120 Z"
+                    />
+                    <path
+                        className="wave-path"
+                        fill="none"
+                        stroke="#F4A261"
+                        strokeWidth="2"
+                        d="M0,64 C240,128 480,0 720,64 C960,128 1200,0 1440,64"
+                    />
+                </svg>
+                <footer>
+                    <p>&copy; 2026 JAN BRAWAND • SWITZERLAND</p>
+                    <p className="footer-credit">
+                        Crafted with passion by{' '}
+                        <a href="https://www.jasminbrawand.ch" target="_blank" rel="noopener noreferrer">
+                            Jasmin Brawand
+                        </a>
+                    </p>
+                </footer>
+            </div>
         </div>
-        <main className='layout-main'>
-            <Outlet />
-        </main>
-        <footer className='layout-footer'>
-            <p>© 2026 Jan Brawand</p>
-        </footer>
-        </>
     )
 }
