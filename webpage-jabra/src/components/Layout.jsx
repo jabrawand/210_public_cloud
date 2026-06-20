@@ -2,7 +2,7 @@ import { Outlet, Link } from 'react-router-dom'
 import { supabase } from '../supabase-client'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import logo from '../assets/logo_jan.png'
+import logo from '../assets/logo.png'
 import '../css/Layout.css'
 
 export default function Layout() {

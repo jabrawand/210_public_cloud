@@ -8,7 +8,6 @@ import Signup from './components/Signup'
 import Raceplan from './components/Raceplan'
 import Activities from './components/Activities'
 import ActivityDetails from './components/ActivityDetails'
-import { Navigate } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
