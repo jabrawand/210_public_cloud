@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import '../css/Signup.css'
 
 export default function Signup() {
+    const [username, setUsername] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
@@ -20,6 +21,9 @@ export default function Signup() {
         const { error } = await supabase.auth.signUp({
             email,
             password,
+            options: {
+                data: { username },
+            },
         })
 
         if (error) {
@@ -37,6 +41,17 @@ export default function Signup() {
             <form className='signup-form' onSubmit={handleSignup}>
                 {error && <p className='signup-error'>{error}</p>}
                 {success && <p className='signup-success'>{success}</p>}
+                <div className='signup-form-group'>
+                    <label htmlFor='username' className='signup-form-label'>Benutzername</label>
+                    <input
+                        type='text'
+                        id='username'
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                        minLength={3}
+                    />
+                </div>
                 <div className='signup-form-group'>
                     <label htmlFor='email' className='signup-form-label'>E-Mail</label>
                     <input
