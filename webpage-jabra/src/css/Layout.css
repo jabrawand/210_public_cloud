@@ -15,7 +15,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: var(--primary-bg);
+    background-color: var(--secondary-heading-color);
     border-bottom: 1px solid var(--primary-text-color);
   }
 
