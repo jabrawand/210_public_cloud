@@ -12,6 +12,17 @@
     width: 80%;
 }
 
+.activities-section-title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--secondary-heading-color);
+    margin: 0 0 1.5rem;
+    padding: 0;
+}
+
 .activities-section-filters {
     display: flex;
     flex-wrap: wrap;

@@ -1,22 +1,25 @@
 .raceplan-container {
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100vh;
+    align-items: flex-start;
+    flex: 1;
+    width: 100%;
+    padding: 2rem 0;
+    box-sizing: border-box;
 }
 
 .raceplan-section-content {
     width: 80%;
-    height: 80%;
 }
 
 .raceplan-section-title {
-    font-size: 2rem;
-    font-weight: var(--font-weight-bold);
+    font-family: var(--font-heading);
+    font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+    font-weight: var(--font-weight-medium);
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--primary-heading-color);
-    margin: 0;
+    color: var(--secondary-heading-color);
+    margin: 0 0 1.5rem;
     padding: 0;
 }
 
@@ -63,7 +66,7 @@
 }
 
 .raceplan-section-card--expanded .raceplan-section-card-header h3 {
-    color: var(--secondary-bg);
+    color: var(--primary-bg);
 }
 
 .raceplan-section-card-details {
@@ -73,8 +76,15 @@
     color: var(--contact-muted);
 }
 
-.raceplan-section-card-details p,
-.raceplan-section-card-details a {
+.raceplan-section-card-details p {
     margin: 0.25rem 0;
     color: var(--contact-muted);
+}
+
+.raceplan-section-card-details a {
+    color: var(--contact-input-line);
+}
+
+.raceplan-section-card-details a:hover {
+    color: var(--accent);
 }

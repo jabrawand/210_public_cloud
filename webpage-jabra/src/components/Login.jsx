@@ -2,6 +2,7 @@ import React from 'react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase-client'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
+import '../css/Login.css'
 
 export default function Login() {
     const [email, setEmail] = useState('')
@@ -31,24 +32,23 @@ export default function Login() {
         })
         if (error) {
             setError(error.message)
-        } else {
-            setLoading(false)
         }
+        setLoading(false)
     }
     return (
         <div className='login-container'>
-            <h1 className='login-title'>Login</h1>
+            <h1 className='login-title'>Anmelden</h1>
             <form className='login-form' onSubmit={handleLogin}>
                 {error && <p className='login-error'>{error}</p>}
                 <div className='login-form-group'>
-                    <label htmlFor='email' className='login-form-label'>Email</label>
-                    <input type='email' id='email' value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <label htmlFor='email' className='login-form-label'>E-Mail</label>
+                    <input type='email' id='email' value={email} onChange={(e) => setEmail(e.target.value)} required />
                 </div>
                 <div className='login-form-group'>
-                    <label htmlFor='password' className='login-form-label'>Password</label>
-                    <input type='password' id='password' value={password} onChange={(e) => setPassword(e.target.value)} />
+                    <label htmlFor='password' className='login-form-label'>Passwort</label>
+                    <input type='password' id='password' value={password} onChange={(e) => setPassword(e.target.value)} required />
                 </div>
-                <button type='submit' disabled={loading} className='login-form-button'>{loading ? 'Loading...' : 'Login'}</button>
+                <button type='submit' disabled={loading} className='login-form-button'>{loading ? 'Wird geladen…' : 'Anmelden'}</button>
                 <p className='login-form-text'>Noch kein Konto? <Link to='/signup' className='login-form-link'>Registrieren</Link></p>
             </form>
         </div>

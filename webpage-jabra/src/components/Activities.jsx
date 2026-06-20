@@ -100,6 +100,7 @@ export default function Activities() {
     return (
         <div className='activities-container'>
             <div className='activities-section-content'>
+                <h1 className='activities-section-title'>Activities</h1>
                 <div className='activities-section-filters'>
                     {FILTERS.map(({ id, label }) => (
                         <button

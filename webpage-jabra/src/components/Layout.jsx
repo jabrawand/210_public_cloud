@@ -23,7 +23,7 @@ export default function Layout() {
                    <Link to="/raceplan">Raceplan</Link>
                    <Link to="/activities">Activities</Link>
                    {session ? (
-                    <button onClick={handleLogout}>Logout</button>
+                    <button type="button" onClick={handleLogout} className="layout-header-logout-button">Logout</button>
                    ) : (
                     <>
                         <Link to="/login">Login</Link>
