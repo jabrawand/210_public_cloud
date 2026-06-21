@@ -1,8 +1,9 @@
-import React from 'react'
-import { supabase } from '../supabase-client'
 import { useState, useEffect } from 'react'
+import { supabase } from '../supabase-client'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { formatDuration, formatDistance, matchesFilter, formatActivityDetails } from '../utils/activities'
+import { formatDate } from '../utils/dateFormat'
 import '../css/Activities.css'
 
 async function getStravaActivities() {
@@ -19,55 +20,12 @@ async function getStravaActivities() {
     return { data: data ?? [], error: null }
 }
 
-function formatDate(dateString) {
-    if (!dateString) return ''
-    return new Date(dateString).toLocaleDateString('de-CH', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-    })
-}
-
-function formatDuration(seconds) {
-    if (!seconds) return ''
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-    const secs = seconds % 60
-    return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
-}
-
-function formatDistance(meters) {
-    if (!meters) return ''
-    if (meters >= 1000) return `${(meters / 1000).toFixed(1)} km`
-    return `${meters} m`
-}
-
 const FILTERS = [
     { id: 'all', label: 'ALLE' },
     { id: 'swim', label: 'SWIM' },
     { id: 'bike', label: 'BIKE' },
     { id: 'run', label: 'RUN' },
 ]
-
-function matchesFilter(sportType, filter) {
-    if (filter === 'all') return true
-    const type = (sportType || '').toLowerCase()
-    if (filter === 'swim') return type.includes('swim')
-    if (filter === 'bike') return type.includes('ride') || type.includes('bike')
-    if (filter === 'run') return type.includes('run')
-    return true
-}
-
-function formatActivityDetails(activity) {
-    const parts = [
-        activity.distance ? formatDistance(activity.distance) : null,
-        activity.moving_time ? formatDuration(activity.moving_time) : null,
-        activity.sport_type || null,
-        activity.total_elevation_gain != null ? `${Math.round(activity.total_elevation_gain)} m` : null,
-    ].filter(Boolean)
-
-    return parts.join(' · ')
-}
 
 export default function Activities() {
     const [activities, setActivities] = useState([])
@@ -79,6 +37,14 @@ export default function Activities() {
 
     const handleActivityClick = (activityId) => {
         if (isAuthenticated) {
+            navigate(`/activities/${activityId}`)
+        }
+    }
+
+    const handleActivityKeyDown = (activityId) => (event) => {
+        if (!isAuthenticated) return
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
             navigate(`/activities/${activityId}`)
         }
     }
@@ -114,7 +80,7 @@ export default function Activities() {
                     ))}
                 </div>
                 <p className='activities-section-subtitle'>
-                    Hier findest du eine Übersicht meinen Trainingseinheiten
+                    Hier findest du eine Übersicht meiner Trainingseinheiten
                 </p>
                 {!isAuthenticated && (
                     <p className='activities-section-hint'>
@@ -137,7 +103,10 @@ export default function Activities() {
                         <li
                             key={activity.id}
                             className={`activities-section-card${isAuthenticated ? '' : ' activities-section-card--disabled'}`}
+                            role={isAuthenticated ? 'button' : undefined}
+                            tabIndex={isAuthenticated ? 0 : undefined}
                             onClick={() => handleActivityClick(activity.id)}
+                            onKeyDown={handleActivityKeyDown(activity.id)}
                         >
                             <h3 className='activities-section-card-title'>
                                 {activity.name} – {formatDate(activity.start_date_local)}

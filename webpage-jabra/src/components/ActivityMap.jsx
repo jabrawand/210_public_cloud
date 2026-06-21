@@ -1,12 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { MapContainer, TileLayer, Polyline, useMap } from 'react-leaflet'
-import polyline from '@mapbox/polyline'
+import { decodePolyline } from '../utils/map'
 import 'leaflet/dist/leaflet.css'
-
-function decodePolyline(encoded) {
-    if (!encoded) return []
-    return polyline.decode(encoded).map(([lat, lng]) => [lat, lng])
-}
 
 function FitBounds({ positions }) {
     const map = useMap()
@@ -20,7 +15,10 @@ function FitBounds({ positions }) {
 }
 
 export default function ActivityMap({ encodedPolyline }) {
-    const positions = decodePolyline(encodedPolyline)
+    const positions = useMemo(
+        () => decodePolyline(encodedPolyline),
+        [encodedPolyline]
+    )
 
     if (positions.length === 0) {
         return (

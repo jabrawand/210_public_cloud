@@ -1,7 +1,8 @@
-import React from 'react'
-import { supabase } from '../supabase-client'
 import { useState, useEffect } from 'react'
+import { supabase } from '../supabase-client'
 import { useAuth } from '../context/AuthContext'
+import { buildRacePayload, raceToForm } from '../utils/raceplan'
+import { formatDate } from '../utils/dateFormat'
 import '../css/Raceplan.css'
 
 const EMPTY_RACE_FORM = {
@@ -12,6 +13,7 @@ const EMPTY_RACE_FORM = {
     discipline: '',
     distance: '',
     event_url: '',
+    result: '',
 }
 
 async function getRaces() {
@@ -22,9 +24,10 @@ async function getRaces() {
 
     if (error) {
         console.error(error)
-        return []
+        return { data: [], error }
     }
-    return data
+
+    return { data: data ?? [], error: null }
 }
 
 async function checkIsAdmin() {
@@ -41,10 +44,15 @@ export default function Raceplan() {
     const [races, setRaces] = useState([])
     const [expandedRace, setExpandedRace] = useState(null)
     const [showForm, setShowForm] = useState(false)
+    const [editingRaceId, setEditingRaceId] = useState(null)
     const [form, setForm] = useState(EMPTY_RACE_FORM)
     const [formError, setFormError] = useState('')
     const [saving, setSaving] = useState(false)
+    const [deletingRaceId, setDeletingRaceId] = useState(null)
     const [isAdminUser, setIsAdminUser] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const [loadError, setLoadError] = useState(null)
+    const [deleteError, setDeleteError] = useState(null)
 
     const { isAuthenticated, session } = useAuth()
 
@@ -52,8 +60,21 @@ export default function Raceplan() {
         setExpandedRace((current) => (current === id ? null : id))
     }
 
+    const handleRaceHeaderKeyDown = (id) => (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            toggleRace(id)
+        }
+    }
+
     useEffect(() => {
-        getRaces().then(setRaces)
+        setLoading(true)
+        setLoadError(null)
+        getRaces().then(({ data, error }) => {
+            setRaces(data)
+            setLoadError(error?.message ?? null)
+            setLoading(false)
+        })
     }, [])
 
     useEffect(() => {
@@ -65,16 +86,36 @@ export default function Raceplan() {
     }, [session])
 
     const handleFormChange = (field) => (e) => {
-        setForm((current) => ({ ...current, [field]: e.target.value }))
+        let { value } = e.target
+        if (field === 'country_code') {
+            value = value.toUpperCase().replace(/[^A-Z]/g, '')
+        }
+        setForm((current) => ({ ...current, [field]: value }))
     }
 
     const handleCancelForm = () => {
         setShowForm(false)
+        setEditingRaceId(null)
         setForm(EMPTY_RACE_FORM)
         setFormError('')
     }
 
-    const handleCreateRace = async (e) => {
+    const handleStartCreate = () => {
+        setEditingRaceId(null)
+        setForm(EMPTY_RACE_FORM)
+        setFormError('')
+        setShowForm(true)
+    }
+
+    const handleStartEdit = (race) => {
+        setEditingRaceId(race.id)
+        setForm(raceToForm(race))
+        setFormError('')
+        setShowForm(true)
+        setExpandedRace(race.id)
+    }
+
+    const handleSaveRace = async (e) => {
         e.preventDefault()
         setFormError('')
 
@@ -85,35 +126,71 @@ export default function Raceplan() {
 
         setSaving(true)
 
-        const { error: insertError } = await supabase.from('races').insert([
-            {
-                name: form.name.trim(),
-                race_date: form.race_date,
-                location: form.location.trim(),
-                country_code: form.country_code.trim().toUpperCase(),
-                discipline: form.discipline.trim(),
-                distance: form.distance.trim(),
-                event_url: form.event_url.trim(),
-            },
-        ])
+        const payload = buildRacePayload(form)
+        const { error: saveError } = editingRaceId
+            ? await supabase.from('races').update(payload).eq('id', editingRaceId)
+            : await supabase.from('races').insert([payload])
 
-        if (insertError) {
-            if (insertError.message.includes('row-level security')) {
+        if (saveError) {
+            if (saveError.message.includes('row-level security')) {
                 setFormError(
                     'Speichern fehlgeschlagen: RLS-Policy Problem. Bitte Admin kontaktieren'
                 )
             } else {
-                setFormError(insertError.message)
+                setFormError(saveError.message)
             }
             setSaving(false)
             return
         }
 
-        const updatedRaces = await getRaces()
+        const { data: updatedRaces, error: reloadError } = await getRaces()
         setRaces(updatedRaces)
+        if (reloadError) {
+            setLoadError(reloadError.message)
+        }
         setForm(EMPTY_RACE_FORM)
+        setEditingRaceId(null)
         setShowForm(false)
         setSaving(false)
+    }
+
+    const handleDeleteRace = async (race) => {
+        const confirmed = window.confirm(
+            `"${race.name}" wirklich dauerhaft löschen? Diese Aktion kann nicht rückgängig gemacht werden.`
+        )
+        if (!confirmed) return
+
+        if (!session) return
+
+        setDeletingRaceId(race.id)
+        setDeleteError(null)
+
+        const { error: deleteErrorResult } = await supabase.from('races').delete().eq('id', race.id)
+
+        if (deleteErrorResult) {
+            console.error(deleteErrorResult)
+            setDeleteError(
+                deleteErrorResult.message.includes('row-level security')
+                    ? 'Löschen fehlgeschlagen: Keine Berechtigung.'
+                    : deleteErrorResult.message
+            )
+            setDeletingRaceId(null)
+            return
+        }
+
+        if (editingRaceId === race.id) {
+            handleCancelForm()
+        }
+        if (expandedRace === race.id) {
+            setExpandedRace(null)
+        }
+
+        const { data: updatedRaces, error: reloadError } = await getRaces()
+        setRaces(updatedRaces)
+        if (reloadError) {
+            setLoadError(reloadError.message)
+        }
+        setDeletingRaceId(null)
     }
 
     return (
@@ -125,15 +202,17 @@ export default function Raceplan() {
                     <button
                         type='button'
                         className='raceplan-section-add-race-btn'
-                        onClick={() => setShowForm(true)}
+                        onClick={handleStartCreate}
                     >
                         Race hinzufügen
                     </button>
                 )}
 
                 {isAuthenticated && isAdminUser && showForm && (
-                    <form className='raceplan-form' onSubmit={handleCreateRace}>
-                        <h2 className='raceplan-form-title'>Neues Rennen</h2>
+                    <form className='raceplan-form' onSubmit={handleSaveRace}>
+                        <h2 className='raceplan-form-title'>
+                            {editingRaceId ? 'Rennen bearbeiten' : 'Neues Rennen'}
+                        </h2>
                         {formError && <p className='raceplan-form-error'>{formError}</p>}
 
                         <div className='raceplan-form-group'>
@@ -185,7 +264,9 @@ export default function Raceplan() {
                                 value={form.country_code}
                                 onChange={handleFormChange('country_code')}
                                 required
-                                maxLength={3}
+                                maxLength={2}
+                                pattern='[A-Z]{2}'
+                                title='Zwei Grossbuchstaben, z. B. CH'
                                 placeholder='CH'
                             />
                         </div>
@@ -215,21 +296,32 @@ export default function Raceplan() {
                                 onChange={handleFormChange('distance')}
                                 required
                                 placeholder='42.195 km, 21.097 km, 70.3 km …'
-                                
                             />
                         </div>
 
                         <div className='raceplan-form-group'>
                             <label htmlFor='race-url' className='raceplan-form-label'>
-                                Event-Link <span className='raceplan-form-required'>*</span>
+                                Event-Link
                             </label>
                             <input
                                 type='url'
                                 id='race-url'
                                 value={form.event_url}
                                 onChange={handleFormChange('event_url')}
-                                required
                                 placeholder='https://…'
+                            />
+                        </div>
+
+                        <div className='raceplan-form-group'>
+                            <label htmlFor='race-result' className='raceplan-form-label'>
+                                Resultat
+                            </label>
+                            <input
+                                type='text'
+                                id='race-result'
+                                value={form.result}
+                                onChange={handleFormChange('result')}
+                                placeholder='z. B. 3:42:15 h, Platz 12'
                             />
                         </div>
 
@@ -247,22 +339,46 @@ export default function Raceplan() {
                                 className='raceplan-form-button'
                                 disabled={saving}
                             >
-                                {saving ? 'Wird gespeichert…' : 'Speichern'}
+                                {saving ? 'Wird gespeichert…' : editingRaceId ? 'Aktualisieren' : 'Speichern'}
                             </button>
                         </div>
                     </form>
                 )}
 
+                {loading && (
+                    <p className='raceplan-section-status'>Rennen werden geladen…</p>
+                )}
+                {!loading && loadError && (
+                    <p className='raceplan-section-status raceplan-section-status--error'>
+                        Rennen konnten nicht geladen werden: {loadError}
+                    </p>
+                )}
+                {!loading && deleteError && (
+                    <p className='raceplan-section-status raceplan-section-status--error'>
+                        {deleteError}
+                    </p>
+                )}
+                {!loading && !loadError && races.length === 0 && (
+                    <p className='raceplan-section-status'>Keine Rennen gefunden.</p>
+                )}
+
                 <ul className='raceplan-section-grid'>
                     {races.map((race) => {
                         const isExpanded = expandedRace === race.id
+                        const isDeleting = deletingRaceId === race.id
                         return (
                             <li
                                 key={race.id}
                                 className={`raceplan-section-card${isExpanded ? ' raceplan-section-card--expanded' : ''}`}
-                                onClick={() => toggleRace(race.id)}
                             >
-                                <div className='raceplan-section-card-header'>
+                                <div
+                                    className='raceplan-section-card-header'
+                                    role='button'
+                                    tabIndex={0}
+                                    onClick={() => toggleRace(race.id)}
+                                    onKeyDown={handleRaceHeaderKeyDown(race.id)}
+                                    aria-expanded={isExpanded}
+                                >
                                     <h3>
                                         {race.name}
                                         {isExpanded ? ' ▲' : ' ▼'}
@@ -270,20 +386,47 @@ export default function Raceplan() {
                                 </div>
                                 {isExpanded && (
                                     <div className='raceplan-section-card-details'>
-                                        <p>{race.race_date}</p>
+                                        <p>Datum: {formatDate(race.race_date)}</p>
                                         <p>
-                                            {race.location} ({race.country_code})
+                                            Ort: {race.location} ({race.country_code})
                                         </p>
-                                        <p>{race.discipline}</p>
-                                        <p>{race.distance}</p>
-                                        <a
-                                            href={race.event_url}
-                                            target='_blank'
-                                            rel='noopener noreferrer'
-                                            onClick={(e) => e.stopPropagation()}
-                                        >
-                                            {race.event_url}
-                                        </a>
+                                        <p>Disziplin: {race.discipline}</p>
+                                        <p>Distanz: {race.distance}</p>
+                                        <p>
+                                            Event-Link:{' '}
+                                            {race.event_url ? (
+                                                <a
+                                                    href={race.event_url}
+                                                    target='_blank'
+                                                    rel='noopener noreferrer'
+                                                >
+                                                    {race.event_url}
+                                                </a>
+                                            ) : (
+                                                'noch nicht verfügbar'
+                                            )}
+                                        </p>
+                                        <p>Resultat: {race.result || 'noch ausstehend'}</p>
+                                        {isAdminUser && (
+                                            <div className='raceplan-section-card-actions'>
+                                                <button
+                                                    type='button'
+                                                    className='raceplan-section-edit-race-btn'
+                                                    onClick={() => handleStartEdit(race)}
+                                                    disabled={isDeleting}
+                                                >
+                                                    Bearbeiten
+                                                </button>
+                                                <button
+                                                    type='button'
+                                                    className='raceplan-section-delete-race-btn'
+                                                    onClick={() => handleDeleteRace(race)}
+                                                    disabled={isDeleting}
+                                                >
+                                                    {isDeleting ? 'Wird gelöscht…' : 'Löschen'}
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </li>

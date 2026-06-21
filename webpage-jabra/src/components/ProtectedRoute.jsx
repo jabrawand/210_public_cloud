@@ -6,7 +6,7 @@ export default function ProtectedRoute({ children }) {
     const location = useLocation()
 
     if (loading) {
-        return null
+        return <p className='page-loading'>Laden…</p>
     }
 
     if (!isAuthenticated) {

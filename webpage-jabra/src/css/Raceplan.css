@@ -23,6 +23,17 @@
     padding: 0;
 }
 
+.raceplan-section-status {
+    text-align: center;
+    color: var(--contact-muted);
+    font-size: 0.9375rem;
+    margin: 0 0 1.5rem;
+}
+
+.raceplan-section-status--error {
+    color: var(--accent);
+}
+
 .raceplan-section-grid {
     display: flex;
     flex-direction: column;
@@ -197,7 +208,6 @@
     align-items: stretch;
     border: 1px solid var(--contact-muted);
     border-radius: 0.5rem;
-    cursor: pointer;
     transition: background-color 0.3s ease, color 0.3s ease;
     overflow: hidden;
     background-color: var(--secondary-bg);
@@ -207,6 +217,7 @@
 .raceplan-section-card-header {
     padding: 1rem;
     text-align: center;
+    cursor: pointer;
 }
 
 .raceplan-section-card h3 {
@@ -215,11 +226,11 @@
     transition: color 0.3s ease;
 }
 
-.raceplan-section-card:not(.raceplan-section-card--expanded):hover {
+.raceplan-section-card:not(.raceplan-section-card--expanded) .raceplan-section-card-header:hover {
     background-color: var(--accent);
 }
 
-.raceplan-section-card:not(.raceplan-section-card--expanded):hover h3 {
+.raceplan-section-card:not(.raceplan-section-card--expanded) .raceplan-section-card-header:hover h3 {
     color: var(--primary-bg);
 }
 
@@ -249,4 +260,58 @@
 
 .raceplan-section-card-details a:hover {
     color: var(--accent);
+}
+
+.raceplan-section-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.raceplan-section-edit-race-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    background-color: transparent;
+    color: var(--accent);
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.raceplan-section-edit-race-btn:hover:not(:disabled) {
+    background-color: var(--accent);
+    color: var(--primary-bg);
+}
+
+.raceplan-section-delete-race-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #c45c5c;
+    border-radius: 999px;
+    background-color: transparent;
+    color: #c45c5c;
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.raceplan-section-delete-race-btn:hover:not(:disabled) {
+    background-color: #c45c5c;
+    color: var(--primary-bg);
+}
+
+.raceplan-section-edit-race-btn:disabled,
+.raceplan-section-delete-race-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }

@@ -70,3 +70,10 @@ body {
   padding: 0;
 }
 
+.page-loading {
+  text-align: center;
+  color: var(--contact-muted);
+  padding: 2rem;
+  margin: 0;
+}
+
