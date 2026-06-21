@@ -49,6 +49,19 @@
     text-decoration: underline;
   }
 
+  .layout-header-username {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: var(--font-weight-bold);
+    text-transform: none;
+    font-size: var(--font-size);
+    letter-spacing: 0.04em;
+  }
+
+  .layout-header-username:hover {
+    text-decoration: underline;
+  }
+
   .layout-header-logout-button {
     background: none;
     border: none;

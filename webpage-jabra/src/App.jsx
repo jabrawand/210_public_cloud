@@ -8,6 +8,7 @@ import Signup from './components/Signup'
 import Raceplan from './components/Raceplan'
 import Activities from './components/Activities'
 import ActivityDetails from './components/ActivityDetails'
+import Profile from './components/Profile'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -24,11 +25,19 @@ function App() {
             <Route path="/activities" element={<Activities />} />
             <Route
               path="/activities/:id"
-                element={
-                  <ProtectedRoute>
-                    <ActivityDetails />
-                  </ProtectedRoute>
-                }
+              element={
+                <ProtectedRoute>
+                  <ActivityDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
             />
           </Route>
         </Routes>

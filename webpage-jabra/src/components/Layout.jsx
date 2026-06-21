@@ -6,7 +6,7 @@ import logo from '../assets/logo.png'
 import '../css/Layout.css'
 
 export default function Layout() {
-    const { session } = useAuth()
+    const { session, username } = useAuth()
     const navigate = useNavigate()
 
     const handleLogout = async () => {
@@ -23,7 +23,12 @@ export default function Layout() {
                    <Link to="/raceplan">Raceplan</Link>
                    <Link to="/activities">Activities</Link>
                    {session ? (
-                    <button type="button" onClick={handleLogout} className="layout-header-logout-button">Logout</button>
+                    <>
+                        {username && (
+                            <Link to="/profile" className="layout-header-username">{username}</Link>
+                        )}
+                        <button type="button" onClick={handleLogout} className="layout-header-logout-button">Logout</button>
+                    </>
                    ) : (
                     <>
                         <Link to="/login">Login</Link>
