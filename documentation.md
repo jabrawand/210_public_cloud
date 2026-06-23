@@ -38,43 +38,135 @@
 
 ## 1. Einleitung
 
-Der Auftraggeber ist ein junger Ausdauersportler, der seine Trainings und Wettkämpfe dokumentieren und für Interessierte öffentlich zugänglich machen möchte.
+Dieses Dokument beschreibt die Planung, Umsetzung und Prüfung einer Fullstack-Webapplikation im Rahmen des Moduls **210 – Public Cloud**. Die Anwendung dient als persönliche Sportler-Plattform: Sie bündelt Trainings- und Wettkampfinformationen an einem Ort und macht sie für unterschiedliche Zielgruppen zugänglich.
+
+Der Auftraggeber ist Jan Brawand, ein ambitionierter Ausdauersportler mit Fokus auf Triathlon. Sein sportliches Ziel ist der **Ironman Thun 2027**. Trainings werden regelmässig mit Garmin-Geräten aufgezeichnet und über Strava mit der Community geteilt. Für Sponsoren, Familie, Freunde und interessierte Fans soll jedoch mehr als ein Strava-Profil sichtbar sein: ein strukturierter, professioneller Webauftritt mit Wettkampfplanung, Trainingsübersicht und rollenbasierter Detailansicht.
+
+Das Projekt wurde als **Einzelarbeit** im Zeitraum vom 15.06.2026 bis zum 27.06.2026 durchgeführt. Technisch liegt der Schwerpunkt auf Cloud-Diensten (Supabase), einer modernen React-Oberfläche und der Anbindung der Strava-API als externe Datenquelle.
 
 ### 1.1 Ausgangslage
 
-Trainingsdaten werden über verschiedene Garmin Geräte erfasst und über die Plattform Strava für andere Sportbegeisterte zur Verfügung gestellt. Informationen zu Wettkämpfen, Trainingsplänen und persönlichen Leistungen sind jedoch nicht öffentlich und  zentral verfügbar. Dadurch entsteht ein erhöhter Verwaltungsaufwand und Sponsoren, Freunde, Familie und Fans erhalten keinen strukturierten Überblick über aktuelle Aktivitäten und geplante Wettkämpfe.
+#### Trainingserfassung und bestehende Systeme
+
+Im Alltag des Sportlers laufen Trainingsdaten über eine etablierte Kette ab:
+
+1. **Erfassung** – Lauf-, Rad- und Schwimmeinheiten werden mit Garmin-Uhren und -Sensoren aufgezeichnet (Distanz, Dauer, Höhe, Leistung, Herzfrequenz).
+2. **Synchronisation** – Die Rohdaten werden automatisch an **Strava** übertragen und dort als Aktivitäten gespeichert.
+3. **Veröffentlichung** – Auf Strava sind Trainings für Follower sichtbar; Karten, Grundstatistiken und soziale Funktionen stehen zur Verfügung.
+
+Strava eignet sich damit gut als zentrale Quelle für **objektive Trainingsdaten**. Für den geplanten Webauftritt reicht das allein nicht aus.
+
+#### Problemstellung
+
+Trotz der vorhandenen Strava-Anbindung fehlt eine **eigene, kontrollierte Präsentationsplattform**. Konkret zeigen sich folgende Lücken:
+
+| Bereich | Ist-Zustand | Auswirkung |
+| ------- | ----------- | ---------- |
+| Wettkämpfe | Termine, Ziele und Ergebnisse liegen verstreut (Kalender, Notizen, Event-Websites) | Kein einheitlicher Raceplan für Dritte |
+| Trainingsübersicht | Strava zeigt alle Aktivitäten gleichwertig; Filter und Darstellung sind generisch | Sponsoren und Fans sehen nicht gezielt die für sie relevanten Informationen |
+| Trainingsdetails | Leistungswerte (Watt, Herzfrequenz, Streckenprofil) sind auf Strava vorhanden, aber nicht in einer eigenen Oberfläche kuratiert | Kein differenzierter Zugang zwischen Öffentlichkeit und registrierten Interessenten |
+| Identität & Story | Persönliche Angaben (Steckbrief, Motivation, sportliche Vergangenheit) sind auf Strava nur begrenzt darstellbar | Der Auftritt wirkt weniger wie ein professionelles Sportler-Portfolio |
+| Verwaltung | Manuelle Pflege mehrerer Informationskanäle | Erhöhter Aufwand für den Sportler |
+
+Aus Sicht der Stakeholder (vgl. Abschnitt 2.1) entsteht so ein **Informationsdefizit**: Unregistrierte Besucher erhalten keinen kompakten Überblick über Ziel, kommende Wettkämpfe und Trainingsfortschritt. Registrierte Nutzer können zwar auf Strava tiefer einsteigen, haben aber keinen dedizierten Zugang zu aufbereiteten Detaildaten innerhalb einer eigenen Marke.
+
+#### Ableitung des Projektbedarfs
+
+Aus der Ausgangslage folgt die Notwendigkeit einer **eigenen Webapplikation**, die:
+
+- öffentliche Inhalte (Home, About, Raceplan, Trainingsliste) zentral bereitstellt,
+- detaillierte Trainingsdaten nur für registrierte Benutzer freigibt,
+- Wettkampfdaten vom Sportler selbst verwaltbar macht,
+- Trainings automatisch aus Strava übernimmt, statt sie manuell zu erfassen.
+
+Damit wird Strava nicht ersetzt, sondern als **Backend-Datenquelle** genutzt; die Webapplikation übernimmt Präsentation, Zugriffssteuerung und Wettkampfverwaltung.
 
 ### 1.2 Projektziel
 
-Ziel des Projekts ist die Entwicklung einer Fullstack-Webapplikation mit folgenden Funktionen:
+#### Hauptziel
 
-* Öffentliche Anzeige von Trainings und Wettkämpfen
-* Benutzerregistrierung und Authentifizierung
-* Rollenbasierte Zugriffssteuerung
-* Verwaltung von Trainings- und Wettkampfdaten
-* Integration der Strava API zur Übernahme von Trainingsdaten
-* Responsives Design für Desktop und mobile Geräte
+Ziel des Projekts ist die Entwicklung einer **Fullstack-Webapplikation**, mit der der Sportler seine sportliche Präsenz online abbilden kann. Besucher sollen auf einen Blick Ziel, Person und kommende Events erkennen; registrierte Nutzer sollen vertiefte Einblicke in einzelne Trainingseinheiten erhalten.
+
+#### Funktionale Ziele
+
+Die Anwendung soll folgende Kernfunktionen umsetzen:
+
+| Nr. | Ziel | Kurzbeschreibung |
+| --- | ---- | ---------------- |
+| Z1 | Öffentliche Informationsseiten | Startseite, About-Seite und Navigation ohne Login |
+| Z2 | Wettkampfplan | Anzeige geplanter und vergangener Rennen inkl. Verlinkung zu offiziellen Event-Seiten |
+| Z3 | Trainingsübersicht | Liste synchronisierter Strava-Aktivitäten mit Filter nach Sportart |
+| Z4 | Trainingsdetails | Detailansicht mit Karte, Statistiken und Leistungswerten (nur für eingeloggte User) |
+| Z5 | Benutzerkonten | Registrierung, Login, Logout, Profilverwaltung und Kontolöschung |
+| Z6 | Rollenmodell | Unterscheidung zwischen Gast, registriertem Benutzer und Sportler (Admin) |
+| Z7 | Wettkampfverwaltung | Der Sportler kann Raceplan-Einträge erstellen, bearbeiten und löschen |
+| Z8 | Strava-Integration | OAuth-Anbindung und serverseitige Synchronisation von Aktivitäten |
+
+Die funktionalen Ziele werden in Abschnitt 2.4 als nummerierte Anforderungen (F1–F18) präzisiert und in Abschnitt 2.3 über User Stories mit Akzeptanzkriterien abgesichert.
+
+#### Technische und qualitative Ziele
+
+Neben den fachlichen Funktionen verfolgt das Projekt folgende technische Leitplanken:
+
+- **Cloud-natives Backend** mit Supabase (PostgreSQL, Auth, Storage, Edge Functions) statt eigenem Server-Betrieb
+- **Sichere Zugriffskontrolle** durch Supabase Auth und Row Level Security (RLS) auf Datenbankebene
+- **Serverseitige Strava-Anbindung**, damit API-Tokens nicht im Browser exponiert werden
+- **Responsives Webdesign** für Desktop und mobile Browser (keine native App)
+- **Wartbare Codebasis** mit klarer Trennung von Frontend, Datenbank und Integrationslogik
+
+#### Erfolgskriterien
+
+Das Projekt gilt als erfolgreich umgesetzt, wenn:
+
+1. Gäste Home, About, Raceplan und die Trainingsübersicht ohne Anmeldung nutzen können.
+2. Registrierte Benutzer Trainingsdetails einsehen und ihr Profil verwalten können.
+3. Der Sportler als Administrator den Raceplan per CRUD-Oberfläche pflegen kann.
+4. Strava-Aktivitäten über die Edge Functions in die Datenbank synchronisiert und in der UI angezeigt werden.
+5. Berechtigungen (öffentlich vs. geschützt vs. Admin) durch RLS und Frontend-Routing durchgesetzt werden.
+6. Die Anwendung auf gängigen Browsern responsiv funktioniert.
 
 ### 1.3 Projektabgrenzung
 
-**Bestandteile des Projekts**
+Die Abgrenzung definiert den **Leistungsumfang** des Modulprojekts. Alles ausserhalb dieser Grenzen wurde bewusst zurückgestellt, um den begrenzten Zeitraum (ca. 50 geplante Stunden) realistisch einzuhalten.
 
-* Entwicklung einer Webapplikation mit React
-* Backend mit Supabase (Datenbank, Authentifizierung und Storage)
-* Strava-OAuth-Authentifizierung
-* Strava-Webhook-Integration zur Synchronisierung von Aktivitäten
-* Rollenmodell (Gast, Benutzer, Sportler)
-* CRUD-Funktionen für Trainings und Wettkämpfe
-* Responsives Webdesign für Desktop und Mobile
+#### Im Projektumfang enthalten
 
-**Nicht Bestandteil des Projekts**
+| Bereich | Umfang |
+| ------- | ------ |
+| Frontend | Single-Page-Application mit **React** und **Vite**; Seiten: Home, About, Login, Signup, Raceplan, Activities, Activity Details, Profil |
+| Backend | **Supabase**: PostgreSQL-Datenbank, Auth, Storage (Bucket `images`), Edge Functions |
+| Authentifizierung | E-Mail/Passwort-Registrierung und -Login über Supabase Auth; JWT-basierte Sessions |
+| Rollenmodell | Drei Rollen: **Gast** (ohne Konto), **User** (registriert), **Sportler** (Admin mit `role = admin`) |
+| Datenverwaltung | CRUD für Wettkämpfe (`races`) durch den Sportler; Lesen von Trainings (`strava_activities`) |
+| Strava | OAuth 2.0, Token-Speicherung in `strava_connection`, Synchronisation per Edge Function (manueller Sync-Button in der UI; Webhook-Infrastruktur vorbereitet) |
+| Sicherheit | RLS-Policies für `profiles`, `races` und `strava_activities`; geschützte Routen im Frontend |
+| Medien | Bilder für Home und About über Supabase Storage |
+| Tests | Manuelle Abnahmetests nach User Stories; automatisierte Unit-Tests (Vitest) für ausgewählte Module |
+| Dokumentation | Projektdokumentation, Arbeitsjournal, README |
 
-* Entwicklung einer nativen Mobile-App
-* Mehrsprachigkeit
-* Social-Media-Funktionen (Kommentare, Likes, Teilen)
-* Push-Benachrichtigungen
-* Sponsoring- oder Zahlungsfunktionen
-* Administrationsbereich für mehrere Sportler
+#### Bewusst nicht im Projektumfang
+
+| Ausschluss | Begründung |
+| ---------- | ---------- |
+| Native Mobile-App (iOS/Android) | Fokus auf Webtechnologien gemäss Modul; responsives Design deckt mobile Nutzung ab |
+| Mehrsprachigkeit | Auftraggeber und Zielpublikum deutschsprachig; UI teilweise Englisch, keine i18n-Infrastruktur |
+| Social-Media-Funktionen (Kommentare, Likes, Teilen) | Strava deckt soziale Interaktion ab; nicht Teil der Sportler-Plattform |
+| Push-Benachrichtigungen | Kein eigener Notification-Dienst vorgesehen |
+| Sponsoring-, Spenden- oder Zahlungsfunktionen | Rechtlicher und technischer Zusatzaufwand; ausserhalb Modulumfang |
+| Multi-Tenant / mehrere Sportler | Plattform ist auf **einen** Sportler (den Auftraggeber) ausgelegt |
+| Manuelle Trainingserfassung | Trainings stammen ausschliesslich aus Strava; kein Formular zum manuellen Anlegen |
+| Vollständige Webhook-Produktivlösung | Webhook-Verarbeitung wurde implementiert, in der Praxis wurde aus Zeitgründen auf manuellen Sync per UI-Button gesetzt (vgl. Arbeitsjournal 22.06.26) |
+| Eigenes Server-Backend (Node/Express) | Supabase als BaaS reduziert Infrastrukturaufwand (vgl. Abschnitt 3.2) |
+
+#### Organisatorische Rahmenbedingungen
+
+- **Projektform:** Einzelarbeit
+- **Zeitraum:** 15.06.2026 – 27.06.2026
+- **Modul:** 210 Public Cloud (Fullstack-Anwendung mit Cloud-Backend und externer API)
+- **Auftraggeber:** Jan Brawand (Sportler und fachlicher Ansprechpartner)
+- **Entwicklung:** Jasmin Brawand
+
+Diese Rahmenbedingungen flossen in die Arbeitsplanung (Abschnitt 3.1) und die Priorisierung der Arbeitspakete ein: Zuerst Anforderungen und Datenmodell, danach Backend und Strava-Anbindung, anschliessend Frontend und Tests.
 
 ---
 
@@ -322,7 +414,7 @@ Das Projekt wurde im Zeitraum vom **15.06.2026** (Start) bis zum **27.06.2026** 
 
 ### 3.2 Technologieauswahl
 
-Für die Umsetzung der Sportler-Webapplikation wurden Technologien gewählt, die zum Modul **210 Public Cloud** passen: schnelle Entwicklung ohne eigenes Server-Backend, sichere Authentifizierung, Cloud-Datenbank und Anbindung einer externen REST-API (Strava).
+Für die Umsetzung der Webapplikation wurden Technologien gewählt, die zum Modul **210 Public Cloud** passen: schnelle Entwicklung ohne eigenes Server-Backend, sichere Authentifizierung, Cloud-Datenbank und Anbindung einer externen REST-API (Strava).
 
 #### Auswahlkriterien
 
@@ -381,7 +473,7 @@ PostgreSQL ist robust, relational und gut für die vorliegenden Entitäten (Prof
 
 **Strava API**
 
-Da die Trainingsdaten des Auftraggebers bereits in Strava vorliegen, ist die Strava API v3 die naheliegende Quelle. OAuth 2.0 ermöglicht die Autorisierung; Webhooks und periodischer Sync halten die lokale Tabelle `strava_activities` aktuell. Die API wird ausschliesslich serverseitig (Edge Functions) aufgerufen.
+Da die Trainingsdaten des Auftraggebers bereits in Strava vorliegen, ist die Strava API v3 die naheliegende Quelle. OAuth 2.0 ermöglicht die Autorisierung; ein **Webhook** synchronisiert einzelne Aktivitäten bei Create/Update/Delete automatisch, ein **manueller Vollsync** dient als Ergänzung. Die API wird ausschliesslich serverseitig (Edge Functions) aufgerufen.
 
 **Leaflet und Mapbox Polyline**
 
@@ -415,7 +507,7 @@ Die Webapplikation folgt einer **BaaS-Architektur (Backend as a Service)**: Das 
 **Datenflüsse:**
 
 1. **Benutzer → Frontend → Supabase:** Login, CRUD für Races/Profile, Lesen der Aktivitäten (über PostgreSQL mit RLS)
-2. **Strava → Edge Functions → PostgreSQL:** OAuth, Token-Pflege, Aktivitäten-Sync und Webhook-Ereignisse
+2. **Strava → Edge Functions → PostgreSQL:** Webhook-Ereignisse (Einzelaktivität), optionaler Vollsync; Token-Pflege intern in Shared Modules
 3. **Frontend → Supabase Storage:** Öffentliche Bilder (Home, About)
 
 ```text
@@ -441,8 +533,8 @@ Die Webapplikation folgt einer **BaaS-Architektur (Backend as a Service)**: Das 
               |                      |                          |
               |              +-------+--------+                 |
               |              | Edge Functions |                 |
-              |              | (Strava-Sync,  |                 |
-              |              |  Webhook, OAuth)|                |
+              |              | (Webhook, Sync,|                 |
+              |              |  OAuth)        |                 |
               |              +-------+--------+                 |
               +----------------------|--------------------------+
                                      |
@@ -462,7 +554,7 @@ Die Webapplikation folgt einer **BaaS-Architektur (Backend as a Service)**: Das 
 | Kein direkter Frontend-Zugriff auf Strava | Access Tokens und API-Keys bleiben serverseitig in Edge Functions |
 | Auth und DB unter Supabase | Beide Dienste gehören zur gleichen Plattform; das Frontend nutzt einen gemeinsamen Supabase-Client |
 | RLS auf PostgreSQL | Rollen (Gast, User, Admin) werden auf Datenbankebene durchgesetzt (vgl. NF4) |
-| Edge Functions als Integrationslayer | Kapseln OAuth, Token-Refresh, Aktivitäten-Import und Webhook-Verarbeitung |
+| Edge Functions als Integrationslayer | Webhook mit Hintergrundverarbeitung, Shared Modules für OAuth/Token-Refresh und Aktivitäten-Sync |
 
 *Tabelle 3.5 – Erläuterung der Systemarchitektur*
 
@@ -470,60 +562,88 @@ Die Webapplikation folgt einer **BaaS-Architektur (Backend as a Service)**: Das 
 
 #### Tabelle profiles
 
-| Attribut | Datentyp |
-| -------- | -------- |
-| id       | uuid (PK/FK) |
-| username | text     |
-| role     | text     |
-| created_at | timestamp |
+| Attribut   | Datentyp     |
+| ---------- | ------------ |
+| id         | uuid (PK/FK) |
+| username   | text         |
+| role       | text         |
+| created_at | timestamp    |
 
 #### Tabelle races
 
-| Attribut | Datentyp |
-| -------- | -------- |
-| id       | int8 (PK) |
-| name     | text     |
-| location | text     |
+| Attribut     | Datentyp   |
+| ------------ | ---------- |
+| id           | int8 (PK)  |
+| name         | text       |
+| location     | text       |
 | country_code | varchar(2) |
-| race_date | date |
-| discipline | text |
-| distance  | text |
-| event_link | text |
-| created_at | timestamp |
+| race_date    | date       |
+| discipline   | text       |
+| distance     | text       |
+| event_link   | text       |
+| goal         | text       |
+| result       | text       |
+| updated_at   | timestamp  |
+| created_at   | timestamp  |
 
 #### Tabelle strava_activities
 
+| Attribut               | Datentyp  |
+| ---------------------- | --------- |
+| id                     | int8 (PK) |
+| strava_activity_id     | int8      |
+| namem                  | text      |
+| sport_type             | text      |
+| start_date             | timestamp |
+| start_date_local       | timestamp |
+| distance               | numeric   |
+| moving_time            | int4      |
+| elapsed_time           | int4      |
+| total_elevation_gain   | numeric   |
+| elev_low               | numeric   |
+| elev_high              | numeric   |
+| average_speed          | numeric   |
+| max_speed              | numeric   |
+| device_watts           | boolean   |
+| average_watts          | numeric   |
+| weighted_average_watts | numeric   |
+| max_watts              | numeric   |
+| has_heartrate          | boolean   |
+| average_heartrate      | numeric   |
+| max_heartrate          | numeric   |
+| kilojoules             | numeric   |
+| summary_polyline       | text      |
+| start_latlng           | numeric   |
+| end_lantlng            | numeric   |
+| raw_data               | jsonb     |
+| synced_at              | timestamp |
+| created_at             | timestamp |
+| updated_at             | timestamp |
+
+#### Tabelle strava_connection
+
+Speichert die OAuth-Verbindung zum Strava-Konto des Sportlers (eine Zeile, `id = 1`). Wird von den Edge Functions für Token-Refresh und Vollsync verwendet.
+
+| Attribut      | Datentyp    |
+| ------------- | ----------- |
+| id            | int8 (PK)   |
+| access_token  | text        |
+| refresh_token | text        |
+| expires_at    | timestamptz |
+| last_sync     | timestamptz |
+| updated_at    | timestamptz |
+| created_at    | timestamptz |
+
+#### Tabelle strava_webhook_events
+
+Deduplizierung eingehender Strava-Webhook-Events. Strava kann dasselbe Event mehrfach senden; `event_id` ist eindeutig.
+
 | Attribut | Datentyp |
 | -------- | -------- |
-| id       | int8 (PK) |
-| strava_activitiy_id | int8 |
-| name | text |
-| sport_type | text |
-| start_date | timestamp |
-| start_date_local | timestamp |
-| distance | numeric |
-| moving_time | int4 |
-| elapsed_time | int4 |
-| total_elevation_gain | numeric |
-| elev_low | numeric |
-| elev_high | numeric |
-| average_speed | numeric |
-| max_speed | numeric |
-| device_watts | boolean |
-| average_watts | numeric |
-| weighted_average_watts | numeric |
-| max_watts | numeric |
-| has_heartrate | boolean |
-| average_heartrate | numeric |
-| max_heartrate | numeric |
-| kilojoules | numeric  |
-| summary_polyline | text |
-| start_latlng | numeric |
-| end_lantlng | numeric |
-| raw_data | jsonb |
-| synced_at | timestamp
-| created_at | timestamp
-| updated_at | timestamp |
+| id | int8 (PK) |
+| event_id | int8 (unique) |
+| object_id | int8 |
+| received_at | timestamptz |
 
 
 
@@ -549,6 +669,7 @@ Erstellte Tabellen:
 * races
 * strava_activities
 * strava_connection
+* strava_webhook_events
 
 ### 4.3 Authentifizierung
 
@@ -563,14 +684,101 @@ Funktionen:
 
 ### 4.4 Strava Integration
 
-Die Strava API wurde über OAuth 2.0 angebunden.
+Die Strava API wurde über OAuth 2.0 angebunden. Die serverseitige Logik liegt in **Supabase Edge Functions** unter `supabase/functions/`. Geteilte Hilfsmodule (`_shared/`) werden per TypeScript-Import eingebunden — es gibt keine HTTP-Aufrufe zwischen eigenen Functions.
 
-Umgesetzte Funktionen:
+#### Ordnerstruktur
 
-* Benutzerautorisierung
-* Speicherung des Access Tokens
-* Abruf von Trainingsdaten
-* Verarbeitung von Webhook-Ereignissen
+```text
+supabase/functions/
+├── _shared/
+│   ├── supabase.ts              # Admin-Client (Service Role)
+│   ├── strava/
+│   │   ├── types.ts             # Typen für Connection und Webhook-Events
+│   │   ├── oauth.ts             # Token prüfen und bei Bedarf refreshen
+│   │   ├── client.ts            # Strava REST API (Einzelaktivität, Listenabruf)
+│   │   └── mapper.ts            # Mapping Strava → Datenbankzeile
+│   └── sync/
+│       ├── sync-activity.ts     # Eine Aktivität laden/löschen
+│       └── sync-all.ts          # Vollsync seit last_sync (mit Pagination)
+├── strava-webhook/
+│   └── index.ts                 # Webhook-Endpoint (Haupteinstieg)
+└── strava-sync/
+    └── index.ts                 # Manueller Vollsync (POST)
+```
+
+#### Edge Functions
+
+| Function | Endpoint | Zweck |
+| -------- | -------- | ----- |
+| `strava-webhook` | `GET/POST …/functions/v1/strava-webhook` | Strava-Webhook: Subscription-Verifikation und Event-Verarbeitung |
+| `strava-sync` | `POST …/functions/v1/strava-sync` | Manueller Vollsync aller Aktivitäten seit `last_sync` |
+
+Die OAuth-Autorisierung (`strava_auth`) wurde separat umgesetzt und speichert Access Token, Refresh Token und Ablaufzeit in `strava_connection`.
+
+#### Webhook-Ablauf
+
+Strava sendet bei neuen, geänderten oder gelöschten Aktivitäten ein POST-Event. Der Webhook antwortet **sofort mit HTTP 200** (Strava erwartet eine Antwort innerhalb von ca. 2 Sekunden) und verarbeitet das Event anschliessend asynchron über `EdgeRuntime.waitUntil()`.
+
+```text
+Strava POST (create / update / delete)
+  → Event validieren (nur object_type = activity)
+  → In strava_webhook_events speichern (Deduplizierung per event_id)
+  → Sofort HTTP 200 an Strava
+  → Hintergrund:
+       create/update → Token prüfen → GET /activities/{object_id} → upsert
+       delete        → DELETE aus strava_activities
+```
+
+| aspect_type | Aktion |
+| ----------- | ------ |
+| `create` | Einzelne Aktivität per `object_id` von Strava laden und in `strava_activities` upserten |
+| `update` | Aktivität erneut laden und upserten |
+| `delete` | Zeile mit `strava_activity_id = object_id` aus `strava_activities` löschen |
+
+Bei der Subscription-Verifikation (GET) gibt der Webhook den `hub.challenge`-Wert zurück und prüft optional den `STRAVA_VERIFY_TOKEN`.
+
+#### Token-Management
+
+Das Token-Refresh ist keine eigene deployte Function, sondern eine interne Hilfsfunktion in `_shared/strava/oauth.ts`:
+
+1. Verbindung aus `strava_connection` laden (id = 1)
+2. Prüfen, ob `expires_at` abgelaufen ist
+3. Falls ja: neues Access Token via `refresh_token` bei Strava anfordern und in der DB speichern
+4. Gültiges Access Token an den API-Aufruf weitergeben
+
+Diese Logik wird sowohl vom Webhook (Einzelaktivität) als auch vom manuellen Vollsync (`strava-sync`) verwendet.
+
+#### Vollsync (strava-sync)
+
+Der Vollsync lädt alle Aktivitäten seit dem Zeitpunkt `last_sync` aus `strava_connection` (mit Pagination, 50 pro Seite), speichert sie in `strava_activities` und aktualisiert `last_sync`. Er wird eingesetzt für:
+
+* Erstes OAuth-Setup (Initialimport)
+* Manuellen Nachsync per POST auf `strava-sync`
+* Optional: periodischen Cron-Job als Sicherheitsnetz
+
+Im Normalbetrieb hält der **Webhook** die Datenbank automatisch aktuell; ein Vollsync ist nur bei Bedarf nötig.
+
+#### Secrets (Supabase Edge Functions)
+
+| Secret | Verwendung |
+| ------ | ---------- |
+| `SUPABASE_URL` | Automatisch gesetzt |
+| `SUPABASE_SERVICE_ROLE_KEY` | Automatisch gesetzt |
+| `STRAVA_CLIENT_ID` | OAuth und Token-Refresh |
+| `STRAVA_CLIENT_SECRET` | OAuth und Token-Refresh |
+| `STRAVA_VERIFY_TOKEN` | Webhook-Subscription-Verifikation |
+
+#### Webhook bei Strava registrieren
+
+```bash
+curl -X POST https://www.strava.com/api/v3/push_subscriptions \
+  -F client_id=DEINE_CLIENT_ID \
+  -F client_secret=STRAVA_CLIENT_SECRET \
+  -F callback_url=https://DEIN-PROJECT.supabase.co/functions/v1/strava-webhook \
+  -F verify_token=VERIFY_TOKEN
+```
+
+SQL für die Deduplizierungstabelle: `supabase/strava-webhook-events.sql`
 
 ### 4.5 Frontend
 
@@ -592,7 +800,20 @@ Umgesetzte Funktionen:
 
 ### 4.6 Deployment
 
+**Frontend:** Das React-Projekt (`webpage-jabra/`) wird mit Vite gebaut und als statische Seite gehostet (z. B. Vercel, Netlify oder Supabase Hosting).
 
+**Backend (Supabase):**
+
+* SQL-Skripte (`supabase/*.sql`) im Supabase SQL Editor ausführen (Tabellen, RLS, Views, Trigger)
+* Edge Functions deployen:
+
+```bash
+supabase functions deploy strava-webhook
+supabase functions deploy strava-sync
+```
+
+* Secrets in Supabase setzen: `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET`, `STRAVA_VERIFY_TOKEN`
+* Strava-Webhook-Subscription mit der `callback_url` auf `strava-webhook` registrieren (vgl. Abschnitt 4.4)
 
 ---
 
