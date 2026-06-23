@@ -23,6 +23,34 @@
     padding: 0;
 }
 
+.activities-section-sync-btn {
+    display: block;
+    margin: 0 auto 1.5rem;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    background-color: var(--accent);
+    color: var(--primary-bg);
+    font-family: var(--font-heading);
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.activities-section-sync-btn:hover:not(:disabled) {
+    background-color: transparent;
+    color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent);
+}
+
+.activities-section-sync-btn:disabled {
+    opacity: 0.7;
+    cursor: default;
+}
+
 .activities-section-filters {
     display: flex;
     flex-wrap: wrap;
@@ -73,6 +101,10 @@
 
 .activities-section-status--error {
     color: var(--accent);
+}
+
+.activities-section-status--success {
+    color: var(--primary-text-color);
 }
 
 .activities-section-grid {
