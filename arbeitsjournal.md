@@ -28,7 +28,7 @@ Das Arbeitsjournal dokumentiert je Arbeitsblock das zugehörige Arbeitspaket (AP
 | 20.06.26 | RLS angepasst: Trainingsübersicht für Gäste, Details nur für eingeloggte User | AP7 | 0.5 h | Übersicht nach Policy-Änderung für Gäste nicht mehr sichtbar → SELECT-Policy für alle ergänzt |
 | 20.06.26 | `profiles` mit `auth.users` verknüpft, Username bei Registrierung erfasst | AP3 | 0.5 h | — |
 | 20.06.26 | Raceplan-CRUD: Admin-Berechtigung über `is_admin()` in der DB geprüft | AP7 | 1 h | User und Admin konnten Races hinzufügen → Berechtigungsprüfung fehlte |
-| 20.06.26 | Activity Details ausgebaut (u. a. min./max. Höhe, gruppierte Statistiken) | AP4/AP5 | 1 h | — |
+| 20.06.26 | Activity Details ausgebaut (u. a. min./max. Höhe, gruppierte Statistiken) | AP3 | 1 h | — |
 | 21.06.26 | Profilverwaltung für eingeloggte User umgesetzt | AP5 | 0.75 h | DELETE zunächst für `public` statt `authenticated` → Supabase-Warnung, Policy angepasst |
 | 21.06.26 | Unit-Tests mit Vitest geschrieben (Utils, ProtectedRoute) | AP7 | 1.5 h | — |
 | 21.06.26 | React-Code strukturiert: wiederkehrende Logik in `utils/` ausgelagert | AP5 | 1 h | Gleiche Hilfsfunktionen waren in mehreren Komponenten dupliziert |
@@ -36,11 +36,15 @@ Das Arbeitsjournal dokumentiert je Arbeitsblock das zugehörige Arbeitspaket (AP
 | 21.06.26 | Treffen mit Sponsor, Besprechung von Activities-Anzeige in UI | AP7 | 1h | Wichtigste Werte Watt, Herzfrequenz |
 | 22.06.26 | Strava Edge Functions refaktoriert: eine grosse Edge Function `sync-strava-activities` prüft `expires_at`, wenn nötig mit `refresh_token` neues `access_token` anfordern, in `strava_connection` abspeichern, fetch activities mit `after=last_sync`, in DB abspeichern | AP4 | 2 h | Webhook habe ich nicht hinbekommen. Aus Zeitlichen Gründen habe ich mich für einen Button in der UI entschieden, mit welchem die Aktivitäten synchronisiert werden können. |
 | 22.06.26 | Dokumentation ergänzt: Datenmodell, Strava-Integration (Kap. 4.4) und Deployment (Kap. 4.6) | AP8 | 0.5 h | — |
-| 23.06.26 | Ausarbeiten Dokumentation Kapitel 1 | AP7 | 0.75 h | — |
-| 23.06.26 | Admin-Button «Strava synchronisieren» auf Trainingsübersicht: nur sichtbar bei `is_admin()`, ruft Edge Function `sync-strava-activities` auf, Liste wird nach Sync neu geladen | AP5 | 1 h | — |
+| 23.06.26 | Ausarbeiten Dokumentation Kapitel 1 | AP8 | 0.75 h | — |
+| 23.06.26 | Admin-Button «Strava synchronisieren» auf Trainingsübersicht: nur sichtbar bei `is_admin()`, ruft Edge Function `sync-strava-activities` auf, Liste wird nach Sync neu geladen | AP5 | 0.25 h | — |
 | 23.06.26 | Sync aus Browser schlug fehl (curl funktionierte): CORS-Preflight (`OPTIONS`) in Edge Function ergänzt, Frontend-Aufruf auf `fetch` mit Session-JWT umgestellt | AP4 | 0.75 h | Fehler «Failed to send a request to the Edge Function» — Browser blockiert Request ohne OPTIONS-Handler |
+| 23.06.26 | Ausarbeiten Dokumentation Kapitel 2 und Kapitel 3 | AP8 | 1 h | — |
+| 23.06.26 | Abnahmetests mit Auftraggeber (T-01 bis T-25) | AP7 | 0.5 h | T-23 NOK (Resultat speichern), T-25 NOK (Löschen); Geschwindigkeitsberechnung in Activity Details fehlerhaft; einige Tests ausstehend |
+| 23.06.26 | Fehleranalyse Raceplan: UPDATE/DELETE auf `races` durch fehlende RLS-Policies in Supabase blockiert; Frontend meldete trotzdem Erfolg (Mutations ohne `.select()`) | AP10 | 0.5 h | Neues Rennen (INSERT) funktionierte, Bearbeiten/Löschen nicht — passt zu fehlenden Policies trotz UI-Erweiterung im Code-Review |
+| 23.06.26 | Fix Raceplan: `Raceplan.jsx` mit `.select()` und Fehlermeldung bei 0 betroffenen Zeilen; `rls-races.sql` idempotent (UPDATE/DELETE-Policies, `enable row level security`) | AP10 | 0.5 h | SQL in Supabase Dashboard ausführen; Retest T-23/T-25 ausstehend |
 
-**Summe protokollierte Arbeitszeit:** ca. 38.5 h
+**Summe protokollierte Arbeitszeit:** ca. 40.25 h
 
 | Arbeitspaket | Summe (Ist) |
 | ------------ | ----------- |
@@ -48,7 +52,7 @@ Das Arbeitsjournal dokumentiert je Arbeitsblock das zugehörige Arbeitspaket (AP
 | AP2 | 2 h |
 | AP3 | 6.25 h |
 | AP4 | 12.75 h |
-| AP5 | 11.75 h |
-| AP7 | 5.25 h |
-| AP8 | 0.5 h |
+| AP5 | 11 h |
+| AP7 | 7 h |
+| AP8 | 2.25 h |
 | AP10 | 0.5 h |
