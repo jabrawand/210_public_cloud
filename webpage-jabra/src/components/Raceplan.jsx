@@ -127,9 +127,9 @@ export default function Raceplan() {
         setSaving(true)
 
         const payload = buildRacePayload(form)
-        const { error: saveError } = editingRaceId
-            ? await supabase.from('races').update(payload).eq('id', editingRaceId)
-            : await supabase.from('races').insert([payload])
+        const { data: savedRows, error: saveError } = editingRaceId
+            ? await supabase.from('races').update(payload).eq('id', editingRaceId).select()
+            : await supabase.from('races').insert([payload]).select()
 
         if (saveError) {
             if (saveError.message.includes('row-level security')) {
@@ -139,6 +139,14 @@ export default function Raceplan() {
             } else {
                 setFormError(saveError.message)
             }
+            setSaving(false)
+            return
+        }
+
+        if (!savedRows?.length) {
+            setFormError(
+                'Speichern fehlgeschlagen: Keine Berechtigung oder Eintrag nicht gefunden.'
+            )
             setSaving(false)
             return
         }
@@ -165,7 +173,11 @@ export default function Raceplan() {
         setDeletingRaceId(race.id)
         setDeleteError(null)
 
-        const { error: deleteErrorResult } = await supabase.from('races').delete().eq('id', race.id)
+        const { data: deletedRows, error: deleteErrorResult } = await supabase
+            .from('races')
+            .delete()
+            .eq('id', race.id)
+            .select()
 
         if (deleteErrorResult) {
             console.error(deleteErrorResult)
@@ -174,6 +186,12 @@ export default function Raceplan() {
                     ? 'Löschen fehlgeschlagen: Keine Berechtigung.'
                     : deleteErrorResult.message
             )
+            setDeletingRaceId(null)
+            return
+        }
+
+        if (!deletedRows?.length) {
+            setDeleteError('Löschen fehlgeschlagen: Keine Berechtigung oder Eintrag nicht gefunden.')
             setDeletingRaceId(null)
             return
         }
