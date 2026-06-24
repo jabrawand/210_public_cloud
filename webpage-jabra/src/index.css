@@ -1,0 +1,79 @@
+:root {
+  --max-width: 1200px;
+
+  --primary-bg: #004B4B;
+  --secondary-bg: #005D5C;
+
+  --primary-heading-color: #080808;
+  --secondary-heading-color: #031B1A;
+
+  --primary-text-color: #CCE0E0;
+
+  --accent: #F4A261;
+
+  /* Contact section (reference palette) */
+  --contact-section-bg: #1a3a3a;
+  --contact-title-color: #ff9e5e;
+  --contact-muted: #a0b0b0;
+  --contact-input-line: rgba(160, 176, 176, 0.45);
+
+  --font-heading: 'Tektur', sans-serif;
+  --font-text: 'Inter', sans-serif;
+
+  --font-size: 18px;
+  --line-height: 1.5;
+  --font-weight: 400;
+  --font-weight-bold: 700;
+  --font-weight-light: 300;
+  --font-weight-thin: 100;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-black: 900;
+}
+
+/* Headings */
+h1 {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 5.5vw, 3.25rem);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--primary-heading-color);
+  margin: 0;
+  padding: 0;
+}
+
+h2 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--secondary-heading-color);
+  margin: 0;
+  padding: 0;
+}
+h3 {
+  font-family: var(--font-heading);
+  color: var(--primary-text-color)
+}
+
+/* Body */
+body {
+  background-color: var(--primary-bg);
+  color: var(--primary-text-color);
+  font-family: var(--font-text);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  font-weight: var(--font-weight);
+  margin: 0;
+  padding: 0;
+}
+
+.page-loading {
+  text-align: center;
+  color: var(--contact-muted);
+  padding: 2rem;
+  margin: 0;
+}
+

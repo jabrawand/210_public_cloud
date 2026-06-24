@@ -1,0 +1,180 @@
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    flex: 1;
+    width: 100%;
+    padding: clamp(2rem, 5vw, 3.5rem) 1rem;
+    box-sizing: border-box;
+}
+
+.profile-title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--secondary-heading-color);
+    margin: 0 0 1.5rem;
+    text-align: center;
+}
+
+.profile-status {
+    color: var(--contact-muted);
+    font-size: 0.9375rem;
+}
+
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    width: 100%;
+    max-width: 420px;
+    padding: clamp(1.5rem, 4vw, 2rem);
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--contact-muted);
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+}
+
+.profile-error {
+    margin: 0;
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+    color: var(--accent);
+    background-color: rgba(244, 162, 97, 0.1);
+    border: 1px solid rgba(244, 162, 97, 0.35);
+    border-radius: 0.25rem;
+    text-align: center;
+}
+
+.profile-success {
+    margin: 0;
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+    color: var(--primary-text-color);
+    background-color: rgba(204, 224, 224, 0.08);
+    border: 1px solid rgba(204, 224, 224, 0.25);
+    border-radius: 0.25rem;
+    text-align: center;
+}
+
+.profile-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.profile-form-label {
+    font-family: var(--font-heading);
+    font-size: 0.8125rem;
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+}
+
+.profile-form-group input {
+    width: 100%;
+    padding: 0.65rem 0;
+    border: none;
+    border-bottom: 1px solid var(--contact-input-line);
+    border-radius: 0;
+    background-color: transparent;
+    color: var(--primary-text-color);
+    font-family: var(--font-text);
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+.profile-form-group input:focus {
+    outline: none;
+    border-bottom-color: var(--accent);
+}
+
+.profile-form-input--disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.profile-form-button {
+    margin-top: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    background-color: var(--accent);
+    color: var(--primary-bg);
+    font-family: var(--font-heading);
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-form-button:hover:not(:disabled) {
+    background-color: transparent;
+    color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent);
+}
+
+.profile-form-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.profile-danger-zone {
+    width: 100%;
+    max-width: 420px;
+    margin-top: 2rem;
+    padding: clamp(1.5rem, 4vw, 2rem);
+    background-color: var(--secondary-bg);
+    border: 1px solid rgba(244, 162, 97, 0.35);
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+}
+
+.profile-danger-title {
+    margin: 0 0 0.75rem;
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+}
+
+.profile-danger-text {
+    margin: 0 0 1.25rem;
+    font-size: 0.9375rem;
+    color: var(--contact-muted);
+    line-height: 1.5;
+}
+
+.profile-delete-button {
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    background-color: transparent;
+    color: var(--accent);
+    font-family: var(--font-heading);
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.profile-delete-button:hover:not(:disabled) {
+    background-color: var(--accent);
+    color: var(--primary-bg);
+}
+
+.profile-delete-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
