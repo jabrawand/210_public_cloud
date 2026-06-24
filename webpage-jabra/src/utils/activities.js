@@ -26,7 +26,7 @@ export function formatActivityDetails(activity) {
         activity.distance ? formatDistance(activity.distance) : null,
         activity.moving_time ? formatDuration(activity.moving_time) : null,
         activity.sport_type || null,
-        activity.total_elevation_gain != null ? `${Math.round(activity.total_elevation_gain)} m` : null,
+        activity.total_elevation_gain > 0 ? `${Math.round(activity.total_elevation_gain)} m` : null,
     ].filter(Boolean)
 
     return parts.join(' · ')

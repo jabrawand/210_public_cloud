@@ -4,6 +4,8 @@ import {
     getStatValue,
     getSportIcon,
     formatKilojoulesAsKcal,
+    formatSwimPace,
+    formatRunPace,
 } from '../../src/utils/activityDetails'
 
 describe('formatKilojoulesAsKcal', () => {
@@ -13,6 +15,26 @@ describe('formatKilojoulesAsKcal', () => {
 
     it('returns empty string for falsy input', () => {
         expect(formatKilojoulesAsKcal(0)).toBe('')
+    })
+})
+
+describe('formatSwimPace', () => {
+    it('formats pace as time per 100 m', () => {
+        expect(formatSwimPace(1000 / 1205)).toBe('2:00 /100 m')
+    })
+
+    it('returns empty string for falsy input', () => {
+        expect(formatSwimPace(0)).toBe('')
+    })
+})
+
+describe('formatRunPace', () => {
+    it('formats pace as time per km', () => {
+        expect(formatRunPace(8000 / 2378)).toBe('4:57 /km')
+    })
+
+    it('returns empty string for falsy input', () => {
+        expect(formatRunPace(0)).toBe('')
     })
 })
 
@@ -116,6 +138,55 @@ describe('getStatGroups', () => {
         expect(groups.find((group) => group.id === 'elevation')).toBeUndefined()
         expect(groups.find((group) => group.id === 'power')).toBeUndefined()
     })
+
+    it('uses elapsed time and omits speed for workout activities', () => {
+        const groups = getStatGroups({
+            sport_type: 'Workout',
+            distance: 138.7,
+            moving_time: 45,
+            elapsed_time: 120,
+            average_speed: 11.1,
+            max_speed: 13.0,
+            has_heartrate: true,
+            average_heartrate: 153,
+            max_heartrate: 160,
+        })
+
+        const overviewGroup = groups.find((group) => group.id === 'overview')
+        expect(overviewGroup.stats.map((stat) => stat.label)).toEqual(['Distanz', 'Verstrichene Zeit'])
+        expect(overviewGroup.stats[1].value).toBe('0:02:00')
+        expect(groups.find((group) => group.id === 'speed')).toBeUndefined()
+    })
+
+    it('shows swim pace instead of speed for swim activities', () => {
+        const groups = getStatGroups({
+            sport_type: 'Swim',
+            distance: 1000,
+            moving_time: 1205,
+            average_speed: 1000 / 1205,
+            max_speed: 1.5,
+        })
+
+        const speedGroup = groups.find((group) => group.id === 'speed')
+        expect(speedGroup.stats).toEqual([
+            { label: 'Durchschn. Tempo', value: '2:00 /100 m' },
+        ])
+    })
+
+    it('shows run pace instead of speed for run activities', () => {
+        const groups = getStatGroups({
+            sport_type: 'Run',
+            distance: 8000,
+            moving_time: 2378,
+            average_speed: 8000 / 2378,
+            max_speed: 5.5,
+        })
+
+        const speedGroup = groups.find((group) => group.id === 'speed')
+        expect(speedGroup.stats).toEqual([
+            { label: 'Durchschn. Tempo', value: '4:57 /km' },
+        ])
+    })
 })
 
 describe('getSportIcon', () => {
@@ -123,6 +194,7 @@ describe('getSportIcon', () => {
         expect(getSportIcon('Swim')).toBe('🏊')
         expect(getSportIcon('Run')).toBe('🏃')
         expect(getSportIcon('Ride')).toBe('🚴')
+        expect(getSportIcon('WeightTraining')).toBe('🏋️')
     })
 
     it('returns fallback icon for unknown sports', () => {

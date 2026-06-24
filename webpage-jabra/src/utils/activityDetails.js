@@ -5,6 +5,22 @@ export function formatSpeed(mps) {
     return `${(mps * 3.6).toFixed(1)} km/h`
 }
 
+export function formatSwimPace(mps) {
+    if (!mps) return ''
+    const totalSeconds = Math.round(100 / mps)
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = totalSeconds % 60
+    return `${minutes}:${String(seconds).padStart(2, '0')} /100 m`
+}
+
+export function formatRunPace(mps) {
+    if (!mps) return ''
+    const totalSeconds = Math.round(1000 / mps)
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = totalSeconds % 60
+    return `${minutes}:${String(seconds).padStart(2, '0')} /km`
+}
+
 const KJ_TO_KCAL = 4.184
 
 export function formatKilojoulesAsKcal(kilojoules) {
@@ -18,6 +34,7 @@ export function getSportIcon(sportType) {
     if (type.includes('swim')) return '🏊'
     if (type.includes('run')) return '🏃'
     if (type.includes('ride') || type.includes('bike')) return '🚴'
+    if (type.includes('weight')) return '🏋️'
     return '🏅'
 }
 
@@ -43,14 +60,27 @@ export function formatHeartrate(value) {
     return `${Math.round(value)} bpm`
 }
 
+function isWorkout(activity) {
+    return (activity.sport_type || '').toLowerCase() === 'workout'
+}
+
+function isSwim(activity) {
+    return (activity.sport_type || '').toLowerCase().includes('swim')
+}
+
+function isRun(activity) {
+    return (activity.sport_type || '').toLowerCase().includes('run')
+}
+
 const STAT_FIELD_DEFS = {
     distance: { key: 'distance', label: 'Distanz', format: (v) => formatDistance(v, 2) },
     moving_time: { key: 'moving_time', label: 'Bewegungszeit', format: formatDuration },
+    elapsed_time: { key: 'elapsed_time', label: 'Verstrichene Zeit', format: formatDuration },
     kilojoules: { key: 'kilojoules', label: 'Kalorien', format: formatKilojoulesAsKcal },
     total_elevation_gain: { key: 'total_elevation_gain', label: 'Höhenzunahme', format: formatElevation },
-    elev_low: { key: 'elev_low', label: 'Tiefste Höhe', format: formatElevation },
-    elev_high: { key: 'elev_high', label: 'Höchste Höhe', format: formatElevation },
     average_speed: { key: 'average_speed', label: 'Durchschn. Geschwindigkeit', format: formatSpeed },
+    average_swim_pace: { key: 'average_speed', label: 'Durchschn. Tempo', format: formatSwimPace },
+    average_run_pace: { key: 'average_speed', label: 'Durchschn. Tempo', format: formatRunPace },
     max_speed: { key: 'max_speed', label: 'Max. Geschwindigkeit', format: formatSpeed },
     average_heartrate: { key: 'average_heartrate', label: 'Durchschn. Herzfrequenz', format: formatHeartrate },
     max_heartrate: { key: 'max_heartrate', label: 'Max. Herzfrequenz', format: formatHeartrate },
@@ -65,10 +95,11 @@ const STAT_FIELD_DEFS = {
 
 const STAT_GROUPS = [
     { id: 'overview', keys: ['distance', 'moving_time', 'kilojoules'] },
-    { id: 'elevation', keys: ['total_elevation_gain', 'elev_low', 'elev_high'] },
-    { id: 'speed', keys: ['average_speed', 'max_speed'] },
-    { id: 'heartrate', keys: ['average_heartrate', 'max_heartrate'], requires: (activity) => activity.has_heartrate },
     { id: 'power', keys: ['average_watts', 'max_watts'], requires: (activity) => activity.device_watts },
+    { id: 'elevation', keys: ['total_elevation_gain'] },
+    { id: 'speed', keys: ['average_speed', 'max_speed'], requires: (activity) => !isWorkout(activity) },
+    { id: 'heartrate', keys: ['average_heartrate', 'max_heartrate'], requires: (activity) => activity.has_heartrate },
+    
 ]
 
 function resolveStat(activity, fieldDef) {
@@ -82,13 +113,33 @@ function resolveStat(activity, fieldDef) {
     return { label, value: format(value) }
 }
 
+function getSpeedGroupKeys(activity) {
+    if (isSwim(activity)) return ['average_swim_pace']
+    if (isRun(activity)) return ['average_run_pace']
+    return ['average_speed', 'max_speed']
+}
+
+function getGroupKeys(group, activity) {
+    if (group.id === 'overview' && isWorkout(activity)) {
+        return group.keys.map((key) => (key === 'moving_time' ? 'elapsed_time' : key))
+    }
+    if (group.id === 'speed') {
+        return getSpeedGroupKeys(activity)
+    }
+    return group.keys
+}
+
 export function getStatGroups(activity) {
     return STAT_GROUPS.filter((group) => !group.requires || group.requires(activity))
-        .map((group) => ({
-            id: group.id,
-            stats: group.keys
-                .map((key) => resolveStat(activity, STAT_FIELD_DEFS[key]))
-                .filter(Boolean),
-        }))
+        .map((group) => {
+            const keys = getGroupKeys(group, activity)
+
+            return {
+                id: group.id,
+                stats: keys
+                    .map((key) => resolveStat(activity, STAT_FIELD_DEFS[key]))
+                    .filter(Boolean),
+            }
+        })
         .filter((group) => group.stats.length > 0)
 }

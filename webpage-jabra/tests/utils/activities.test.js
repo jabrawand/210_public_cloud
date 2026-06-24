@@ -73,4 +73,15 @@ describe('formatActivityDetails', () => {
     it('omits missing fields', () => {
         expect(formatActivityDetails({ sport_type: 'Swim' })).toBe('Swim')
     })
+
+    it('omits zero elevation gain', () => {
+        expect(
+            formatActivityDetails({
+                distance: 2000,
+                moving_time: 2402,
+                sport_type: 'Swim',
+                total_elevation_gain: 0,
+            })
+        ).toBe('2.0 km · 0:40:02 · Swim')
+    })
 })
