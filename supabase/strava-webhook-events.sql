@@ -3,7 +3,7 @@
 
 create table if not exists public.strava_webhook_events (
   id bigint generated always as identity primary key,
-  event_id bigint not null,
+  event_id bigint not null unique,
   object_id bigint not null,
   received_at timestamptz not null default now(),
   unique (event_id)
