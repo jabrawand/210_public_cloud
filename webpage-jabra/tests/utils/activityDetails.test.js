@@ -77,16 +77,11 @@ describe('getStatGroups', () => {
         const groups = getStatGroups({
             distance: 1000,
             total_elevation_gain: 81,
-            elev_low: 561,
-            elev_high: 622,
         })
 
         const elevationGroup = groups.find((group) => group.id === 'elevation')
-        expect(elevationGroup.stats.map((stat) => stat.label)).toEqual([
-            'Höhenzunahme',
-            'Tiefste Höhe',
-            'Höchste Höhe',
-        ])
+        expect(elevationGroup.stats.map((stat) => stat.label)).toEqual(['Höhenzunahme'])
+        expect(elevationGroup.stats[0].value).toBe('81 m')
     })
 
     it('groups speed stats separately', () => {
