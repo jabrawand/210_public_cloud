@@ -4,7 +4,7 @@
 **Projekt:** Public Cloud
 **Autor:** Jasmin Brawand
 **Klasse:** UIFZ-2425-005
-**Datum:** 22.06.2026
+**Datum:** 25.06.2026
 **GitHub**: [Link zu GitHub](https://github.com/jabrawand/210_public_cloud)
 
 ---
@@ -558,14 +558,14 @@ Geplant war ein Gesamtaufwand von **50 Stunden** im Zeitraum 15.06.2026 bis 27.0
 #### Projektorganisation
 
 
-| Aspekt                                         | Festlegung                                                    |
-| ---------------------------------------------- | ------------------------------------------------------------- |
-| Projektform                                    | Einzelarbeit                                                  |
-| Zeitraum                                       | 15.06.2026 (Kick-off) – 27.06.2026 (Abgabe)                   |
-| Geplanter Gesamtaufwand                        | 50 Stunden                                                    |
-| Protokollierter Ist-Aufwand (Stand 23.06.2026) | ca. 38,5 Stunden                                              |
-| Auftraggeber                                   | Jan Brawand (fachliche Anforderungen, Strava-OAuth, Feedback) |
-| Entwicklungswerkzeug                           | Cursor IDE (Code, KI-Unterstützung, Dokumentation)            |
+| Aspekt                      | Festlegung                                                    |
+| --------------------------- | ------------------------------------------------------------- |
+| Projektform                 | Einzelarbeit                                                  |
+| Zeitraum                    | 15.06.2026 (Kick-off) – 27.06.2026 (Abgabe)                   |
+| Geplanter Gesamtaufwand     | 50 Stunden                                                    |
+| Protokollierter Ist-Aufwand | 46,75 Stunden                                                 |
+| Auftraggeber                | Jan Brawand (fachliche Anforderungen, Strava-OAuth, Feedback) |
+| Entwicklungswerkzeug        | Cursor IDE (Code, KI-Unterstützung, Dokumentation)            |
 
 
 *Tabelle 3.1 – Projektorganisation*
@@ -759,12 +759,12 @@ Das React-Frontend kommuniziert ausschliesslich mit **Supabase**. Die Anbindung 
                              |
                              | HTTPS (Supabase JS Client)
                              v
-              +--------------+--------------------------------+
-              |              Supabase Plattform               |
-              |  +----------+  +-----------+  +-------------+ |
-              |  |   Auth   |  | PostgreSQL|  |   Storage   | |
-              |  | (JWT)    |  | + RLS     |  |  (Bilder)   | |
-              |  +----------+  +-----------+  +-------------+ |
+              +--------------+----------------------------------+
+              |              Supabase Plattform                 |
+              |  +----------+  +-----------+  +-------------+   |
+              |  |   Auth   |  | PostgreSQL|  |   Storage   |   |
+              |  | (JWT)    |  | + RLS     |  |  (Bilder)   |   |
+              |  +----------+  +-----------+  +-------------+   |
               |                      ^                          |
               |                      |                          |
               |              +-------+--------+                 |
@@ -1327,7 +1327,7 @@ Im Rahmen von **AP7 (Testdurchführung, Fehlerbehebung und Abnahmetests)** wurde
 *Tabelle 5.1 – Abnahmetests pro User Story*
 
 
-| ID   | Bezug           | Rolle    | Testschritt                                                | Erwartetung                                                                         | Ergebnis |
+| ID   | Bezug           | Rolle    | Testschritt                                                | Erwartetung                                                                                 | Ergebnis |
 | ---- | --------------- | -------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------- | -------- |
 | T-01 | US1 / F1        | Gast     | `/` aufrufen ohne Login                                    | Startseite lädt; Vorname, Nachname und Ziel des Sportlers sind sichtbar                     | OK       |
 | T-02 | US1 / F1        | Gast     | Navigation auf der Startseite prüfen                       | Links zu Home, About, Raceplan, Activities, Login und Signup sind sichtbar                  | OK       |
@@ -1384,16 +1384,16 @@ Im Rahmen von **AP7 (Testdurchführung, Fehlerbehebung und Abnahmetests)** wurde
 *Tabelle 5.3 – Tests für Row Level Security und Berechtigungen (NF3, NF4)*
 
 
-| ID   | Bezug     | Rolle    | Testschritt                                             | Erwartetes Ergebnis                                         | Ergebnis                    |
-| ---- | --------- | -------- | ------------------------------------------------------- | ----------------------------------------------------------- | --------------------------- |
-| T-33 | F16 / NF4 | Gast     | Trainingsübersicht (`strava_activities_overview`) laden | SELECT erlaubt; Übersichtsdaten sichtbar                    | OK                          |
-| T-34 | F16 / NF4 | Gast     | Vollständige Aktivitätsdetails abrufen (direkte URL)    | Kein Zugriff; Redirect zu Login                             | NOK - Redirect schlägt fehl |
-| T-35 | NF4       | User     | Aktivitätsdetails als eingeloggter User laden           | SELECT auf `strava_activities` erlaubt                      | OK                          |
-| T-36 | NF4       | User     | Raceplan-Eintrag erstellen versuchen                    | Kein «Race hinzufügen»-Button; INSERT über UI nicht möglich | OK                          |
-| T-37 | NF4       | User     | Raceplan-Update/-Delete über UI versuchen               | Bearbeiten/Löschen-Buttons nicht sichtbar                   | OK                          |
-| T-38 | NF4       | Sportler | Race CRUD ausführen                                     | INSERT, UPDATE, DELETE nur mit `role = admin` erfolgreich   | OK                          |
-| T-39 | NF4       | User     | Fremdes Profil per UI bearbeiten                        | Nur eigenes Profil unter `/profile` editierbar              | OK                          |
-| T-40 | F10 / NF4 | User     | Eigenes Konto löschen                                   | RPC `delete_own_account` entfernt Profil und Auth-User      | OK                          |
+| ID   | Bezug     | Rolle    | Testschritt                                             | Erwartetes Ergebnis                                         | Ergebnis |
+| ---- | --------- | -------- | ------------------------------------------------------- | ----------------------------------------------------------- | -------- |
+| T-33 | F16 / NF4 | Gast     | Trainingsübersicht (`strava_activities_overview`) laden | SELECT erlaubt; Übersichtsdaten sichtbar                    | OK       |
+| T-34 | F16 / NF4 | Gast     | Vollständige Aktivitätsdetails abrufen (direkte URL)    | Kein Zugriff; Redirect zu Login                             | OK       |
+| T-35 | NF4       | User     | Aktivitätsdetails als eingeloggter User laden           | SELECT auf `strava_activities` erlaubt                      | OK       |
+| T-36 | NF4       | User     | Raceplan-Eintrag erstellen versuchen                    | Kein «Race hinzufügen»-Button; INSERT über UI nicht möglich | OK       |
+| T-37 | NF4       | User     | Raceplan-Update/-Delete über UI versuchen               | Bearbeiten/Löschen-Buttons nicht sichtbar                   | OK       |
+| T-38 | NF4       | Sportler | Race CRUD ausführen                                     | INSERT, UPDATE, DELETE nur mit `role = admin` erfolgreich   | OK       |
+| T-39 | NF4       | User     | Fremdes Profil per UI bearbeiten                        | Nur eigenes Profil unter `/profile` editierbar              | OK       |
+| T-40 | F10 / NF4 | User     | Eigenes Konto löschen                                   | RPC `delete_own_account` entfernt Profil und Auth-User      | OK       |
 
 
 ### 5.6 Nicht-funktionale Tests
@@ -1404,7 +1404,7 @@ Im Rahmen von **AP7 (Testdurchführung, Fehlerbehebung und Abnahmetests)** wurde
 | ID   | Bezug | Testschritt                                                 | Erwartetes Ergebnis                                                  | Ergebnis |
 | ---- | ----- | ----------------------------------------------------------- | -------------------------------------------------------------------- | -------- |
 | T-41 | NF1   | App in Chrome und Safari öffnen                             | Alle Seiten laden und sind bedienbar                                 | OK       |
-| T-42 | NF2   | Desktop- und Mobile-Ansicht (DevTools / Handy) prüfen       | Layout passt sich an; Navigation und Inhalte bleiben lesbar          | —        |
+| T-42 | NF2   | Desktop- und Mobile-Ansicht (DevTools / Handy) prüfen       | Layout passt sich an; Navigation und Inhalte bleiben lesbar          | OK       |
 | T-43 | NF6   | Alle Hauptseiten durchklicken                               | Einheitliches Layout, klare Navigation, verständliche Beschriftungen | OK       |
 | T-44 | NF7   | Ungültige Formulareingaben testen (Login, Signup, Raceplan) | Validierung/Fehlermeldungen werden angezeigt                         | OK       |
 | T-45 | NF8   | Raceplan-Eintrag speichern, Seite neu laden                 | Daten bleiben in der Datenbank erhalten                              | OK       |
@@ -1492,8 +1492,8 @@ Erwartete Ausgabe: `Test Files 5 passed (5)`, `Tests 34 passed (34)`.
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | Manuelle Testfälle (T-01–T-47)          | 47                                                                                                           |
 | Automatisierte Unit-Tests (AT-01–AT-15) | 34                                                                                                           |
-| Manuelle Tests bestanden (OK)           | —                                                                                                            |
-| Manuelle Tests fehlgeschlagen (NOK)     | —                                                                                                            |
+| Manuelle Tests bestanden (OK)           | 47                                                                                                           |
+| Manuelle Tests fehlgeschlagen (NOK)     | 0                                                                                                            |
 | Automatisierte Tests bestanden          | 34 / 34                                                                                                      |
 | Behobene Fehler während AP7             | RLS-Policy für Aktivitätsübersicht; Admin-Berechtigung beim Raceplan-CRUD; Polyline-Mapping aus Strava-Daten |
 
@@ -1899,12 +1899,12 @@ Diese Fehler zeigen: **RLS-Policies müssen vollständig deployed sein**, bevor 
 #### Zeitliche Bilanz
 
 
-| Arbeitspaket    | Soll (h) | Ist (h) | Abweichung                       |
-| --------------- | -------- | ------- | -------------------------------- |
-| AP4 Strava      | 8        | 12,75   | +4,75 h (Webhook, OAuth, CORS)   |
-| AP5 Frontend    | 8        | 11      | +3 h (CSS, Details, Sync-Button) |
-| AP2 Architektur | 3        | 2       | −1 h                             |
-| AP3 Backend     | 8        | 6,25    | −1,75 h                          |
+| Arbeitspaket    | Soll (h) | Ist (h) | Abweichung                          |
+| --------------- | -------- | ------- | ----------------------------------- |
+| AP4 Strava      | 8        | 10,25   | +2,25 h (Webhook, OAuth, CORS)      |
+| AP5 Frontend    | 8        | 8,75    | +0,75 h (CSS, Details, Sync-Button) |
+| AP2 Architektur | 3        | 2       | −1 h                                |
+| AP3 Backend     | 8        | 6       | −2 h                                |
 
 
 Die Mehrzeit in Strava und Frontend wurde nur teilweise durch Einsparungen in anderen Paketen kompensiert. Für die IPA werde ich bei **externen Integrationen** grosszügigere Puffer einplanen.
@@ -1949,11 +1949,13 @@ Abzugeben ist der für mich erreichbare Github Link mit README (oder alternativ 
 ### 7.4 Quellen
 
 **Supabase**
-* [Youtoube Supabase Full Course](https://www.youtube.com/watch?v=kyphLGnSz6Q&t=971s)
-* [Supabase Docs](https://supabase.com/docs)
+
+- [Youtoube Supabase Full Course](https://www.youtube.com/watch?v=kyphLGnSz6Q&t=971s)
+- [Supabase Docs](https://supabase.com/docs)
 
 **Strava**
-* [Strava for developers](https://developers.strava.com/)
+
+- [Strava for developers](https://developers.strava.com/)
 
 ### 7.5 KI als Hilfsmittel
 
@@ -1961,21 +1963,22 @@ Im Projekt wurde die KI-Funktion von **Cursor** gezielt als Hilfsmittel eingeset
 
 **komplett von KI-Tools generiert**:
 
-* Leaflet-Karte (`ActivityMap.jsx`) und Polyline-Dekodierung (`utils/map.js`) mit `summary_polyline`
-* Umrechnungen und Stat-Gruppen in `utils/activityDetails.js` (Bewegungszeit, Geschwindigkeit, Pace, Kalorien usw.)
-* Vitest-Unit-Tests (`tests/utils/`, `ProtectedRoute.test.jsx`)
+- Leaflet-Karte (`ActivityMap.jsx`) und Polyline-Dekodierung (`utils/map.js`) mit `summary_polyline`
+- Umrechnungen und Stat-Gruppen in `utils/activityDetails.js` (Bewegungszeit, Geschwindigkeit, Pace, Kalorien usw.)
+- Vitest-Unit-Tests (`tests/utils/`, `ProtectedRoute.test.jsx`)
 
 **teilweise mit KI ergänzt**:
 
-* Supabase Edge Functions (Strava-OAuth, Sync, Webhook) — Grundgerüst mit KI; OAuth-Flow war bereits manuell vorhanden
-* CSS (`src/css/*.css`) und responsives Verhalten
-* View `strava_activities_overview` (SQL in `rls-activities.sql`, Anbindung in `Activities.jsx`)
-* Code-Review und Bugfixes nach KI-gestütztem Review (u. a. Raceplan `.select()`)
+- Supabase Edge Functions (Strava-OAuth, Sync, Webhook) — Grundgerüst mit KI; OAuth-Flow war bereits manuell vorhanden
+- CSS (`src/css/*.css`) und responsives Verhalten
+- View `strava_activities_overview` (SQL in `rls-activities.sql`, Anbindung in `Activities.jsx`)
+- Code-Review und Bugfixes nach KI-gestütztem Review (u. a. Raceplan `.select()`)
 
 **ohne KI-Tools**:
 
-* Aufbau Supabase-Backend (Tabellen, RLS-Policies, Storage)
-* Grundgerüst React-Frontend (Vite-Init, Routing, Layout, Home, Login, Signup, About, Activities)
-* Authentifizierung (`AuthContext`, `ProtectedRoute`)
-* Raceplan-CRUD (`Raceplan.jsx`, `utils/raceplan.js`)
-* Datenmodell, Architektur und Projektplanung
+- Aufbau Supabase-Backend (Tabellen, RLS-Policies, Storage)
+- Grundgerüst React-Frontend (Vite-Init, Routing, Layout, Home, Login, Signup, About, Activities)
+- Authentifizierung (`AuthContext`, `ProtectedRoute`)
+- Raceplan-CRUD (`Raceplan.jsx`, `utils/raceplan.js`)
+- Datenmodell, Architektur und Projektplanung
+
