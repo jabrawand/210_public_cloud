@@ -18,26 +18,44 @@
 - [2. Analyse](#2-analyse)
   - [2.1 Stakeholder](#21-stakeholder)
   - [2.2 Rollenmodell](#22-rollenmodell)
-    - [2.2.1 Gast](#221-gast-unregistrierter-benutzer)
-    - [2.2.2 User](#222-user-registrierter-benutzer)
-    - [2.2.3 Sportler](#223-sportler-admin-benutzer)
   - [2.3 User Stories](#23-user-stories)
-    - [2.3.1 Rolle Gast](#231-rolle-gast-unregistrierter-benutzer)
   - [2.4 Anforderungen](#24-anforderungen)
-    - [2.4.1 Funktionale Anforderungen](#241-funktionale-anforderungen)
-    - [2.4.2 Nicht-Funktionale Anforderungen](#242-nicht-funktionale-anforderungen)
 - [3. Planung](#3-planung)
   - [3.1 Arbeitsplanung](#31-arbeitsplanung)
   - [3.2 Technologieauswahl](#32-technologieauswahl)
   - [3.3 Systemarchitektur](#33-systemarchitektur)
   - [3.4 Datenmodell](#34-datenmodell)
 - [4. Umsetzung](#4-umsetzung)
+  - [4.1 Entwicklungsumgebung](#41-entwicklungsumgebung)
+  - [4.2 Datenbank und Backend](#42-datenbank-und-backend)
+  - [4.3 Authentifizierung](#43-authentifizierung)
+  - [4.4 Strava-Integration](#44-strava-integration)
+  - [4.5 Frontend](#45-frontend)
+  - [4.6 Deployment und CI](#46-deployment-und-ci)
 - [5. Test](#5-test)
   - [5.1 Teststrategie](#51-teststrategie)
+  - [5.2 Testumgebung](#52-testumgebung)
   - [5.3 Abnahmetests – User Stories](#53-abnahmetests--user-stories)
+  - [5.4 Authentifizierung und Rollen](#54-authentifizierung-und-rollen)
   - [5.5 Sicherheits- und RLS-Tests](#55-sicherheits--und-rls-tests)
+  - [5.6 Nicht-funktionale Tests](#56-nicht-funktionale-tests)
   - [5.7 Automatisierte Unit-Tests (Vitest)](#57-automatisierte-unit-tests-vitest)
   - [5.8 Testzusammenfassung](#58-testzusammenfassung)
+- [6. Sicherheitskonzept](#6-sicherheitskonzept)
+  - [6.1 Sicherheitsziele und Bedrohungsmodell](#61-sicherheitsziele-und-bedrohungsmodell)
+  - [6.2 Schutzkonzept (Defense in Depth)](#62-schutzkonzept-defense-in-depth)
+  - [6.3 Authentifizierung](#63-authentifizierung)
+  - [6.4 Autorisierung und Rollenmodell](#64-autorisierung-und-rollenmodell)
+  - [6.5 Row Level Security (RLS)](#65-row-level-security-rls)
+  - [6.6 Schutz sensibler Daten und Secrets](#66-schutz-sensibler-daten-und-secrets)
+  - [6.7 Strava-Integration und Edge Functions](#67-strava-integration-und-edge-functions)
+  - [6.8 Frontend-Sicherheit](#68-frontend-sicherheit)
+  - [6.9 Sicherheitsprüfung](#69-sicherheitsprüfung)
+  - [6.10 Bekannte Grenzen und Verbesserungspotenzial](#610-bekannte-grenzen-und-verbesserungspotenzial)
+- [7. Fazit](#7-fazit)
+  - [7.1 Das lief gut](#71-das-lief-gut)
+  - [7.2 Da gab es Probleme](#72-da-gab-es-probleme)
+  - [7.3 Bewertungsraster](#73-bewertungsraster)
 
 ---
 
@@ -65,13 +83,15 @@ Strava eignet sich damit gut als zentrale Quelle für **objektive Trainingsdaten
 
 Trotz der vorhandenen Strava-Anbindung fehlt eine **eigene, kontrollierte Präsentationsplattform**. Konkret zeigen sich folgende Lücken:
 
-| Bereich | Ist-Zustand | Auswirkung |
-| ------- | ----------- | ---------- |
-| Wettkämpfe | Termine, Ziele und Ergebnisse liegen verstreut (Kalender, Notizen, Event-Websites) | Kein einheitlicher Raceplan für Dritte |
-| Trainingsübersicht | Strava zeigt alle Aktivitäten gleichwertig; Filter und Darstellung sind generisch | Sponsoren und Fans sehen nicht gezielt die für sie relevanten Informationen |
-| Trainingsdetails | Leistungswerte (Watt, Herzfrequenz, Streckenprofil) sind auf Strava vorhanden, aber nicht in einer eigenen Oberfläche kuratiert | Kein differenzierter Zugang zwischen Öffentlichkeit und registrierten Interessenten |
-| Identität & Story | Persönliche Angaben (Steckbrief, Motivation, sportliche Vergangenheit) sind auf Strava nur begrenzt darstellbar | Der Auftritt wirkt weniger wie ein professionelles Sportler-Portfolio |
-| Verwaltung | Manuelle Pflege mehrerer Informationskanäle | Erhöhter Aufwand für den Sportler |
+
+| Bereich            | Ist-Zustand                                                                                                                      | Auswirkung                                                                          |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Wettkämpfe         | Termine, Ziele und Ergebnisse liegen verstreut (Kalender, Notizen, Event-Websites)                                               | Kein einheitlicher Raceplan für Dritte                                              |
+| Trainingsübersicht | Strava zeigt alle Aktivitäten gleichwertig; Filter und Darstellung sind generisch                                                | Sponsoren und Fans sehen nicht gezielt die für sie relevanten Informationen         |
+| Trainingsdetails   | Leistungswerte (Watt, Herzfrequenz, Streckenprofil) sind auf Strava vorhanden, aber nicht in einer eigenen Oberfläche abgebildet | Kein differenzierter Zugang zwischen Öffentlichkeit und registrierten Interessenten |
+| Identität & Story  | Persönliche Angaben (Steckbrief, Motivation, sportliche Vergangenheit) sind auf Strava nur begrenzt darstellbar                  | Der Auftritt wirkt weniger wie ein professionelles Sportler-Portfolio               |
+| Verwaltung         | Manuelle Pflege mehrerer Informationskanäle                                                                                      | Erhöhter Aufwand für den Sportler                                                   |
+
 
 Aus Sicht der Stakeholder (vgl. Abschnitt 2.1) entsteht so ein **Informationsdefizit**: Unregistrierte Besucher erhalten keinen kompakten Überblick über Ziel, kommende Wettkämpfe und Trainingsfortschritt. Registrierte Nutzer können zwar auf Strava tiefer einsteigen, haben aber keinen dedizierten Zugang zu aufbereiteten Detaildaten innerhalb einer eigenen Marke.
 
@@ -96,16 +116,18 @@ Ziel des Projekts ist die Entwicklung einer **Fullstack-Webapplikation**, mit we
 
 Die Anwendung soll folgende Kernfunktionen umsetzen:
 
-| Nr. | Ziel | Kurzbeschreibung |
-| --- | ---- | ---------------- |
-| Z1 | Öffentliche Informationsseiten | Startseite, About-Seite und Navigation ohne Login |
-| Z2 | Wettkampfplan | Anzeige geplanter und vergangener Rennen inkl. Verlinkung zu offiziellen Event-Seiten |
-| Z3 | Trainingsübersicht | Liste synchronisierter Strava-Aktivitäten mit Filter nach Sportart |
-| Z4 | Trainingsdetails | Detailansicht mit Karte, Statistiken und Leistungswerten (nur für eingeloggte User) |
-| Z5 | Benutzerkonten | Registrierung, Login, Logout, Profilverwaltung und Kontolöschung |
-| Z6 | Rollenmodell | Unterscheidung zwischen Gast, registriertem Benutzer und Sportler (Admin) |
-| Z7 | Wettkampfverwaltung | Der Sportler kann Raceplan-Einträge erstellen, bearbeiten und löschen |
-| Z8 | Strava-Integration | OAuth-Anbindung und serverseitige Synchronisation von Aktivitäten |
+
+| Nr. | Ziel                           | Kurzbeschreibung                                                                      |
+| --- | ------------------------------ | ------------------------------------------------------------------------------------- |
+| Z1  | Öffentliche Informationsseiten | Startseite, About-Seite und Navigation ohne Login                                     |
+| Z2  | Wettkampfplan                  | Anzeige geplanter und vergangener Rennen inkl. Verlinkung zu offiziellen Event-Seiten |
+| Z3  | Trainingsübersicht             | Liste synchronisierter Strava-Aktivitäten mit Filter nach Sportart                    |
+| Z4  | Trainingsdetails               | Detailansicht mit Karte, Statistiken und Leistungswerten (nur für eingeloggte User)   |
+| Z5  | Benutzerkonten                 | Registrierung, Login, Logout, Profilverwaltung und Kontolöschung                      |
+| Z6  | Rollenmodell                   | Unterscheidung zwischen Gast, registriertem Benutzer und Sportler (Admin)             |
+| Z7  | Wettkampfverwaltung            | Der Sportler kann Raceplan-Einträge erstellen, bearbeiten und löschen                 |
+| Z8  | Strava-Integration             | OAuth-Anbindung und serverseitige Synchronisation von Aktivitäten                     |
+
 
 *Die funktionalen Ziele werden in Abschnitt 2.4 als nummerierte Anforderungen (F1–F18) präzisiert und in Abschnitt 2.3 über User Stories mit Akzeptanzkriterien abgesichert.*
 
@@ -136,32 +158,34 @@ Die Abgrenzung definiert den **Leistungsumfang** des Modulprojekts. Alles ausser
 
 #### Im Projektumfang enthalten
 
-| Bereich | Umfang |
-| ------- | ------ |
-| Frontend | Single-Page-Application mit **React** und **Vite**; Seiten: Home, About, Login, Signup, Raceplan, Activities, Activity Details, Benutzerprofil |
-| Backend | **Supabase**: PostgreSQL-Datenbank, Auth, Storage (Bucket `images`), Edge Functions |
-| Authentifizierung | E-Mail/Passwort-Registrierung und -Login über Supabase Auth; JWT-basierte Sessions |
-| Rollenmodell | Drei Rollen: **Gast** (ohne Konto), **User** (registriert mit `role = user`), **Sportler** (Admin mit `role = admin`) |
-| Datenverwaltung | CRUD für Wettkämpfe (`races`) durch den Sportler; Lesen von Trainings (`strava_activities`) |
-| Strava | OAuth 2.0, Token-Speicherung in `strava_connection`, Synchronisation per Edge Function (manueller Sync-Button in der UI; Webhook-Infrastruktur vorbereitet) |
-| Sicherheit | RLS-Policies für `profiles`, `races` und `strava_activities`; geschützte Routen im Frontend |
-| Medien | Bilder für Home und About über Supabase Storage |
-| Tests | Manuelle Abnahmetests nach User Stories; automatisierte Unit-Tests (Vitest) für ausgewählte Module |
-| Dokumentation | Projektdokumentation, Arbeitsjournal, README |
+
+| Bereich           | Umfang                                                                                                                                                      |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frontend          | Single-Page-Application mit **React** und **Vite**; Seiten: Home, About, Login, Signup, Raceplan, Activities, Activity Details, Benutzerprofil              |
+| Backend           | **Supabase**: PostgreSQL-Datenbank, Auth, Storage (Bucket `images`), Edge Functions                                                                         |
+| Authentifizierung | E-Mail/Passwort-Registrierung und -Login über Supabase Auth; JWT-basierte Sessions                                                                          |
+| Rollenmodell      | Drei Rollen: **Gast** (ohne Konto), **User** (registriert mit `role = user`), **Sportler** (Admin mit `role = admin`)                                       |
+| Datenverwaltung   | CRUD für Wettkämpfe (`races`) durch den Sportler; Lesen von Trainings (`strava_activities`)                                                                 |
+| Strava            | OAuth 2.0, Token-Speicherung in `strava_connection`, Synchronisation per Edge Function (manueller Sync-Button in der UI; Webhook-Infrastruktur vorbereitet) |
+| Sicherheit        | RLS-Policies für `profiles`, `races` und `strava_activities`; geschützte Routen im Frontend                                                                 |
+| Medien            | Bilder für Home und About über Supabase Storage                                                                                                             |
+| Tests             | Manuelle Abnahmetests nach User Stories; automatisierte Unit-Tests (Vitest) für ausgewählte Module                                                          |
+| Dokumentation     | Projektdokumentation, Arbeitsjournal, README                                                                                                                |
+
 
 #### Bewusst nicht im Projektumfang
 
-| Ausschluss | Begründung |
-| ---------- | ---------- |
-| Native Mobile-App (iOS/Android) | Fokus auf Webtechnologien gemäss Modul; responsives Design deckt mobile Nutzung ab |
-| Mehrsprachigkeit | Auftraggeber und Zielpublikum deutschsprachig; UI teilweise Englisch, keine i18n-Infrastruktur |
-| Social-Media-Funktionen (Kommentare, Likes, Teilen) | Strava deckt soziale Interaktion ab; nicht Teil der Sportler-Plattform |
-| Push-Benachrichtigungen | Kein eigener Notification-Dienst vorgesehen |
-| Sponsoring-, Spenden- oder Zahlungsfunktionen | Rechtlicher und technischer Zusatzaufwand; ausserhalb Modulumfang |
-| Multi-Tenant / mehrere Sportler | Plattform ist auf **einen** Sportler (den Auftraggeber) ausgelegt |
-| Manuelle Trainingserfassung | Trainings stammen ausschliesslich aus Strava; kein Formular zum manuellen Anlegen |
-| Vollständige Webhook-Produktivlösung | Webhook-Verarbeitung wurde implementiert, in der Praxis wurde aus Zeitgründen auf manuellen Sync per UI-Button gesetzt (vgl. Arbeitsjournal 22.06.26) |
-| Eigenes Server-Backend (Node/Express) | Supabase als BaaS reduziert Infrastrukturaufwand (vgl. Abschnitt 3.2) |
+
+| Ausschluss                                          | Begründung                                                                                     |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Native Mobile-App (iOS/Android)                     | Fokus auf Webtechnologien gemäss Modul; responsives Design deckt mobile Nutzung ab             |
+| Mehrsprachigkeit                                    | Auftraggeber und Zielpublikum deutschsprachig; UI teilweise Englisch, keine i18n-Infrastruktur |
+| Social-Media-Funktionen (Kommentare, Likes, Teilen) | Strava deckt soziale Interaktion ab; nicht Teil der Sportler-Plattform                         |
+| Push-Benachrichtigungen                             | Kein eigener Notification-Dienst vorgesehen                                                    |
+| Sponsoring-, Spenden- oder Zahlungsfunktionen       | Rechtlicher und technischer Zusatzaufwand; ausserhalb Modulumfang                              |
+| Multi-Tenant / mehrere Sportler                     | Plattform ist auf **einen** Sportler (den Auftraggeber) ausgelegt                              |
+| Manuelle Trainingserfassung                         | Trainings stammen ausschliesslich aus Strava; kein Formular zum manuellen Anlegen              |
+
 
 #### Organisatorische Rahmenbedingungen
 
@@ -187,11 +211,13 @@ Stakeholder sind alle Personen oder Gruppen, die ein berechtigtes Interesse an d
 
 #### Stakeholderübersicht
 
-| Stakeholder | Rolle im System | Interesse | Erwartung an die Anwendung |
-| ----------- | --------------- | --------- | -------------------------- |
+
+| Stakeholder                | Rolle im System  | Interesse                                                                                                    | Erwartung an die Anwendung                                                                                             |
+| -------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
 | Jan Brawand (Auftraggeber) | Sportler / Admin | Professioneller Webauftritt; einfache Pflege von Wettkampfdaten; automatische Übernahme von Strava-Trainings | Raceplan selbst verwalten; Trainings ohne manuelle Doppelerfassung anzeigen; öffentliche Seiten für Sponsoren und Fans |
-| Registrierte Benutzer | User | Vertiefte Einblicke in Trainingsleistung | Zugang zu Detaildaten (Watt, Herzfrequenz, Karte); eigenes Profil verwalten |
-| Unregistrierte Besucher | Gast | Überblick über Sportler, Ziele und Events | Öffentliche Seiten ohne Login; Möglichkeit zur Registrierung für mehr Inhalte |
+| Registrierte Benutzer      | User             | Vertiefte Einblicke in Trainingsleistung                                                                     | Zugang zu Detaildaten (Watt, Herzfrequenz, Karte); eigenes Profil verwalten                                            |
+| Unregistrierte Besucher    | Gast             | Überblick über Sportler, Ziele und Events                                                                    | Öffentliche Seiten ohne Login; Möglichkeit zur Registrierung für mehr Inhalte                                          |
+
 
 *Tabelle 2.1 – Stakeholderanalyse*
 
@@ -199,26 +225,20 @@ Stakeholder sind alle Personen oder Gruppen, die ein berechtigtes Interesse an d
 
 Neben den direkten Nutzern der Plattform spielen weitere Gruppen eine Rolle, ohne selbst ein Benutzerkonto zu benötigen:
 
-| Stakeholder | Bezug zum Projekt | Relevanz |
-| ----------- | ----------------- | -------- |
-| Sponsoren | Interessieren sich an Trainingsfortschritt und Wettkampfplanung | Profitieren von der öffentlichen Startseite, About-Seite und dem Raceplan |
-| Familie & Freunde | Verfolgen den sportlichen Werdegang | Nutzen primär die öffentlichen Bereiche; können sich optional registrieren |
-| Dozent / Prüfung (Modul 210) | Bewertet technische Umsetzung und Dokumentation | Erwartet Cloud-Architektur, sichere Auth, externe API-Anbindung |
-| Strava (Plattform) | Externe Datenquelle für Trainings | OAuth- und API-Nutzung gemäss Strava-Richtlinien |
+
+| Stakeholder                  | Bezug zum Projekt                                               | Relevanz                                                                   |
+| ---------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Sponsoren                    | Interessieren sich an Trainingsfortschritt und Wettkampfplanung | Profitieren von der öffentlichen Startseite, About-Seite und dem Raceplan  |
+| Familie & Freunde            | Verfolgen den sportlichen Werdegang                             | Nutzen primär die öffentlichen Bereiche; können sich optional registrieren |
+| Dozent / Prüfung (Modul 210) | Bewertet technische Umsetzung und Dokumentation                 | Erwartet Cloud-Architektur, sichere Auth, externe API-Anbindung            |
+| Strava (Plattform)           | Externe Datenquelle für Trainings                               | OAuth- und API-Nutzung gemäss Strava-Richtlinien                           |
+
 
 *Tabelle 2.2 – Indirekte Stakeholder*
 
-#### Konflikte und Priorisierung
-
-Zwischen den Stakeholder-Interessen bestehen teilweise unterschiedliche Schwerpunkte:
-
-- **Öffentlichkeit vs. Exklusivität:** Sponsoren und Gäste sollen einen breiten Überblick erhalten; detaillierte Leistungsdaten sind nur für registrierte User vorgesehen (F16). Das schafft einen Anreiz zur Registrierung und schützt gleichzeitig spezifische Trainingsinformationen.
-- **Einfachheit vs. Vollständigkeit:** Der Sportler wünscht möglichst wenig manuellen Pflegeaufwand. Trainings werden deshalb aus Strava synchronisiert; nur Wettkämpfe werden manuell gepflegt.
-- **Zeitbudget vs. Funktionsumfang:** Nicht alle Wünsche (z. B. vollautomatischer Webhook-Sync) konnten im Projektzeitraum vollständig produktiv gesetzt werden (vgl. Abschnitt 1.3).
-
 ### 2.2 Rollenmodell
 
-Die Webapplikation implementiert ein **rollenbasiertes Zugriffsmodell (RBAC)** mit drei Stufen. Jede höhere Rolle umfasst alle Rechte der darunterliegenden Rolle. Die Durchsetzung erfolgt auf zwei Ebenen:
+Die Webapplikation implementiert ein **rollenbasiertes Zugriffsmodell** mit drei Stufen. Jede höhere Rolle umfasst alle Rechte der darunterliegenden Rolle. Die Durchsetzung erfolgt auf zwei Ebenen:
 
 1. **Frontend** – geschützte Routen (`ProtectedRoute`) und bedingte UI-Elemente (z. B. Admin-Buttons im Raceplan)
 2. **Datenbank** – Row Level Security (RLS) auf den Tabellen `profiles`, `races` und `strava_activities`
@@ -233,11 +253,13 @@ Die Webapplikation implementiert ein **rollenbasiertes Zugriffsmodell (RBAC)** m
 
 #### Rollenübersicht
 
-| Rolle | Authentifizierung | Speicherung | Admin-Rechte |
-| ----- | ----------------- | ----------- | ------------ |
-| Gast | Keine Session | — | Nein |
-| User | Supabase Auth (JWT) | `profiles.role = 'user'` (Standard bei Registrierung) | Nein |
+
+| Rolle    | Authentifizierung   | Speicherung                                           | Admin-Rechte      |
+| -------- | ------------------- | ----------------------------------------------------- | ----------------- |
+| Gast     | Keine Session       | —                                                     | Nein              |
+| User     | Supabase Auth (JWT) | `profiles.role = 'user'` (Standard bei Registrierung) | Nein              |
 | Sportler | Supabase Auth (JWT) | `profiles.role = 'admin'` (manuell in der DB gesetzt) | Ja (`is_admin()`) |
+
 
 *Tabelle 2.3 – Rollenübersicht*
 
@@ -257,13 +279,15 @@ Gäste sind Besucher ohne Supabase-Account. Sie können alle **öffentlichen Sei
 
 **Technische Umsetzung:**
 
-| Aspekt | Umsetzung |
-| ------ | --------- |
-| Erreichbare Routen | `/`, `/about`, `/raceplan`, `/activities`, `/login`, `/signup` |
-| Trainingsdaten | Lesen über die View `strava_activities_overview` (nur Grundfelder: Name, Distanz, Dauer, Sportart, Datum) |
-| Wettkampfdaten | Lesen der Tabelle `races` (RLS: `Everyone can view races`) |
-| Trainingsdetails | Route `/activities/:id` ist geschützt; Klick auf eine Aktivität führt Gäste nicht zur Detailseite |
-| Registrierung | Formular unter `/signup`; Username wird in `auth.users` Metadata und via Trigger in `profiles` gespeichert |
+
+| Aspekt             | Umsetzung                                                                                                  |
+| ------------------ | ---------------------------------------------------------------------------------------------------------- |
+| Erreichbare Routen | `/`, `/about`, `/raceplan`, `/activities`, `/login`, `/signup`                                             |
+| Trainingsdaten     | Lesen über die View `strava_activities_overview` (nur Grundfelder: Name, Distanz, Dauer, Sportart, Datum)  |
+| Wettkampfdaten     | Lesen der Tabelle `races` (RLS: `Everyone can view races`)                                                 |
+| Trainingsdetails   | Route `/activities/:id` ist geschützt; Klick auf eine Aktivität führt Gäste nicht zur Detailseite          |
+| Registrierung      | Formular unter `/signup`; Username wird in `auth.users` Metadata und via Trigger in `profiles` gespeichert |
+
 
 **Zugehörige User Stories:** US1–US5
 
@@ -280,14 +304,16 @@ Registrierte Benutzer sind über **Supabase Auth** angemeldet. Sie erben alle Ga
 
 **Technische Umsetzung:**
 
-| Aspekt | Umsetzung |
-| ------ | --------- |
-| Authentifizierung | E-Mail/Passwort über Supabase Auth; Session als JWT im Browser |
-| Geschützte Routen | `/activities/:id` und `/profile` über `ProtectedRoute`; Redirect zu `/login` ohne Session |
-| Trainingsdetails | Voller SELECT auf `strava_activities` für `authenticated` (RLS) |
-| Profilverwaltung | UPDATE auf eigene Zeile in `profiles` (`auth.uid() = id`) |
-| Kontolöschung | Löschen des Auth-Users und des zugehörigen Profils (Policy und Trigger in `profiles-delete-account`) |
-| Admin-Funktionen | Keine – `is_admin()` gibt `false` zurück |
+
+| Aspekt            | Umsetzung                                                                                            |
+| ----------------- | ---------------------------------------------------------------------------------------------------- |
+| Authentifizierung | E-Mail/Passwort über Supabase Auth; Session als JWT im Browser                                       |
+| Geschützte Routen | `/activities/:id` und `/profile` über `ProtectedRoute`; Redirect zu `/login` ohne Session            |
+| Trainingsdetails  | Voller SELECT auf `strava_activities` für `authenticated` (RLS)                                      |
+| Profilverwaltung  | UPDATE auf eigene Zeile in `profiles` (`auth.uid() = id`)                                            |
+| Kontolöschung     | Löschen des Auth-Users und des zugehörigen Profils (Policy und Trigger in `profiles-delete-account`) |
+| Admin-Funktionen  | Keine – `is_admin()` gibt `false` zurück                                                             |
+
 
 **Zugehörige User Stories:** US6–US8
 
@@ -302,12 +328,14 @@ Der Sportler ist (neben der Entwicklerin) der **einzige Administrator** der Plat
 
 **Technische Umsetzung:**
 
-| Aspekt | Umsetzung |
-| ------ | --------- |
-| Admin-Erkennung | `public.is_admin()` prüft `profiles.role = 'admin'` für `auth.uid()` |
-| Raceplan-CRUD | INSERT, UPDATE, DELETE auf `races` nur mit `is_admin()` (RLS-Policies) |
-| UI | Admin-Buttons (Erstellen, Bearbeiten, Löschen) im Raceplan werden nur angezeigt, wenn `supabase.rpc('is_admin')` `true` liefert |
-| Strava-Sync | OAuth-Tokens in `strava_connection`; Synchronisation über Edge Function (vom Sportler ausgelöst) |
+
+| Aspekt          | Umsetzung                                                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Admin-Erkennung | `public.is_admin()` prüft `profiles.role = 'admin'` für `auth.uid()`                                                            |
+| Raceplan-CRUD   | INSERT, UPDATE, DELETE auf `races` nur mit `is_admin()` (RLS-Policies)                                                          |
+| UI              | Admin-Buttons (Erstellen, Bearbeiten, Löschen) im Raceplan werden nur angezeigt, wenn `supabase.rpc('is_admin')` `true` liefert |
+| Strava-Sync     | OAuth-Tokens in `strava_connection`; Synchronisation über Edge Function (vom Sportler ausgelöst)                                |
+
 
 **Zugehörige User Stories:** US9–US11
 
@@ -405,7 +433,7 @@ Der Sportler ist (neben der Entwicklerin) der **einzige Administrator** der Plat
 
 #### US8: Konto löschen
 
-**Als User möchte ich** mein Konto löschen können, damit ich die Plattform wie der verlassen kann.
+**Als User möchte ich** mein Konto löschen können, damit ich die Plattform wieder verlassen kann.
 
 **Akzeptanzkriterien**
 
@@ -462,63 +490,60 @@ Die funktionalen Anforderungen F1–F18 lassen sich den User Stories aus Abschni
 
 #### 2.4.1 Funktionale Anforderungen
 
-| ID | Anforderung | Rolle | User Story | Priorität |
-| -- | ----------- | ----- | ---------- | --------- |
-| F1 | Die Webapplikation stellt eine öffentlich zugängliche Startseite mit Informationen zum Sportler bereit | Gast | US1 | Muss |
-| F2 | Die Webapplikation stellt eine öffentlich zugängliche Informations-Seite mit Steckbrief und Bild des Sportlers bereit | Gast | US2 | Muss |
-| F3 | Die Webapplikation stellt eine öffentlich zugänglichen Wettkampf-Seite mit geplanten und vergangenen Wetkämpfen inklusive Verlinkung zu den offiziellen Veranstaltungsseiten bereit | Gast | US3 | Muss |
-| F4 | Die Webapplikation stellt eine öffentlich zugängliche Trainingsübersicht bereit | Gast | US4 | Muss |
-| F5 | Trainings können nach Sportart gefiltert werden | Gast | US4 | Muss |
-| F6 | Benutzer können sich registrieren und ein Benutzerkonto erstellen | Gast | US5 | Muss |
-| F7 | Registrierte Benutzer können sich an- und abmelden | User | — | Muss |
-| F8 | Registrierte Benutzer können detaillierte Trainingsinformationen einsehen | User | US6 | Muss |
-| F9 | Registrierte Benutzer ihren Benutzernamen bearbeiten | User | US7 | Muss |
-| F10 | Registrierte Benutzer können ihr Benutzerkonto dauerhaft löschen | User | US8 | Muss |
-| F11 | Administratoren können Wettkampf-Einträge erstellen | Sportler | US9 | Muss |
-| F12 | Administratoren können Wettkampf-Einträge bearbeiten | Sportler | US10 | Muss |
-| F13 | Administratoren können Wettkampf-Einträge löschen | Sportler | US11 | Muss |
-| F14 | Die Anwendung unterscheidet sich zwischen den Rollen Gast, Benutzer und Administrator | Alle | — | Muss |
-| F15 | Der Zugriff auf geschützte Inhalte erfolgt nur nach erfolgreicher Authentifizierung | User | US6 | Muss |
-| F16 | Trainingsdetails sind ausschliesslich für registrierte Benutzer sichtbar | User | US4, US6 | Muss |
-| F17 | Wettkampf- und Trainingseinträge werden zentral in einer Datenbank gespeichert | Alle | — | Muss |
-| F18 | Änderungen an Trainings- und Wettkampf-Daten werden unmittelbar in der Anwendung angezeigt | Alle | — | Muss |
+
+| ID  | Anforderung                                                                                                                                                                         | Rolle    | User Story | Priorität |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------- | --------- |
+| F1  | Die Webapplikation stellt eine öffentlich zugängliche Startseite mit Informationen zum Sportler bereit                                                                              | Gast     | US1        | Muss      |
+| F2  | Die Webapplikation stellt eine öffentlich zugängliche Informations-Seite mit Steckbrief und Bild des Sportlers bereit                                                               | Gast     | US2        | Muss      |
+| F3  | Die Webapplikation stellt eine öffentlich zugänglichen Wettkampf-Seite mit geplanten und vergangenen Wetkämpfen inklusive Verlinkung zu den offiziellen Veranstaltungsseiten bereit | Gast     | US3        | Muss      |
+| F4  | Die Webapplikation stellt eine öffentlich zugängliche Trainingsübersicht bereit                                                                                                     | Gast     | US4        | Muss      |
+| F5  | Trainings können nach Sportart gefiltert werden                                                                                                                                     | Gast     | US4        | Muss      |
+| F6  | Benutzer können sich registrieren und ein Benutzerkonto erstellen                                                                                                                   | Gast     | US5        | Muss      |
+| F7  | Registrierte Benutzer können sich an- und abmelden                                                                                                                                  | User     | —          | Muss      |
+| F8  | Registrierte Benutzer können detaillierte Trainingsinformationen einsehen                                                                                                           | User     | US6        | Muss      |
+| F9  | Registrierte Benutzer ihren Benutzernamen bearbeiten                                                                                                                                | User     | US7        | Muss      |
+| F10 | Registrierte Benutzer können ihr Benutzerkonto dauerhaft löschen                                                                                                                    | User     | US8        | Muss      |
+| F11 | Administratoren können Wettkampf-Einträge erstellen                                                                                                                                 | Sportler | US9        | Muss      |
+| F12 | Administratoren können Wettkampf-Einträge bearbeiten                                                                                                                                | Sportler | US10       | Muss      |
+| F13 | Administratoren können Wettkampf-Einträge löschen                                                                                                                                   | Sportler | US11       | Muss      |
+| F14 | Die Anwendung unterscheidet sich zwischen den Rollen Gast, Benutzer und Administrator                                                                                               | Alle     | —          | Muss      |
+| F15 | Der Zugriff auf geschützte Inhalte erfolgt nur nach erfolgreicher Authentifizierung                                                                                                 | User     | US6        | Muss      |
+| F16 | Trainingsdetails sind ausschliesslich für registrierte Benutzer sichtbar                                                                                                            | User     | US4, US6   | Muss      |
+| F17 | Wettkampf- und Trainingseinträge werden zentral in einer Datenbank gespeichert                                                                                                      | Alle     | —          | Muss      |
+| F18 | Änderungen an Trainings- und Wettkampf-Daten werden unmittelbar in der Anwendung angezeigt                                                                                          | Alle     | —          | Muss      |
+
 
 *Tabelle 2.4 – Funktionale Anforderungen*
 
-**Erläuterungen:**
-
-- **F7 (An-/Abmelden)** ergänzt die User Stories um den Login-/Logout-Flow, der für US6–US8 vorausgesetzt wird.
-- **F14–F16** sind übergreifende Sicherheitsanforderungen und werden durch RLS-Policies und `ProtectedRoute` umgesetzt (vgl. Abschnitt 4.3 und 5.5).
-- **F17** betrifft die Tabellen `races` und `strava_activities` in Supabase PostgreSQL; Trainings werden zusätzlich über die Strava-API befüllt.
-- **F18** wird durch direktes Nachladen der Daten nach CRUD-Operationen bzw. nach dem Strava-Sync erfüllt.
-
 **Anforderungen ausserhalb des User-Story-Umfangs:**
 
-| ID | Beschreibung | Umsetzung |
-| -- | ------------ | --------- |
-| — | Strava-OAuth und Aktivitätensynchronisation | Edge Functions, Tabelle `strava_connection` (vgl. Abschnitt 4.4) |
-| — | Anzeige der Trainingsroute auf einer Karte | Leaflet mit decoded `summary_polyline` in Activity Details |
+
+| ID  | Beschreibung                                | Umsetzung                                                        |
+| --- | ------------------------------------------- | ---------------------------------------------------------------- |
+| —   | Strava-OAuth und Aktivitätensynchronisation | Edge Functions, Tabelle `strava_connection` (vgl. Abschnitt 4.4) |
+| —   | Anzeige der Trainingsroute auf einer Karte  | Leaflet mit decoded `summary_polyline` in Activity Details       |
+
 
 Diese Punkte folgen aus der Projektabgrenzung (Abschnitt 1.3) und dem Auftraggebergespräch, sind aber nicht als eigene User Stories formuliert.
 
 #### 2.4.2 Nicht-Funktionale Anforderungen
 
-| ID | Anforderung | Kategorie | Umsetzung im Projekt |
-| -- | ------------ | --------- | --------------------- |
-| NF1 | Die Anwendung muss über aktuelle Webbrowser nutzbar sein | Kompatibilität | React-SPA; getestet in Chrome und Safari |
-| NF2 | Die Benutzeroberfläche muss responsiv sein und auf Desktop sowie mobilen Endgeräten funktionieren | Benutzbarkeit | CSS Media Queries auf allen Seiten; Mobile-First-Layout in Home, Raceplan und Activities |
-| NF3 | Benutzerkonten müssen durch eine sichere Authentifizierung geschützt werden | Sicherheit | Supabase Auth mit gehashten Passwörtern und JWT-Sessions |
-| NF4 | Rollen und Berechtigungen müssen mittels Row Level Security (RLS) abgesichert werden | Sicherheit | RLS auf `profiles`, `races`, `strava_activities`; View `strava_activities_overview` für Gäste |
-| NF5 | Personenbezogene Daten werden in einer PostgreSQL-Datenbank innerhalb von Supabase gespeichert | Datenhaltung | Tabellen `profiles`, `auth.users`; Hosting in Supabase Cloud |
-| NF6 | Die Anwendung muss eine intuitive und übersichtliche Benutzeroberfläche bereitstellen | Benutzbarkeit | Einheitliches Layout mit Navigation; Portfolio-Karten auf der Startseite |
-| NF7 | Ungültige Benutzereingaben werden validiert und dem Benutzer verständlich angezeigt | Benutzbarkeit | Clientseitige Validierung in Login, Signup, Raceplan-Formular und Profil |
-| NF8 | Änderungen an Benutzerdaten, Trainings und Raceplan-Einträgen müssen dauerhaft gespeichert werden | Datenhaltung | Persistenz in PostgreSQL; Strava-Sync schreibt in `strava_activities` |
+
+| ID  | Anforderung                                                                                       | Kategorie      | Umsetzung im Projekt                                                                          |
+| --- | ------------------------------------------------------------------------------------------------- | -------------- | --------------------------------------------------------------------------------------------- |
+| NF1 | Die Anwendung muss über aktuelle Webbrowser nutzbar sein                                          | Kompatibilität | React-SPA; getestet in Chrome und Safari                                                      |
+| NF2 | Die Benutzeroberfläche muss responsiv sein und auf Desktop sowie mobilen Endgeräten funktionieren | Benutzbarkeit  | CSS Media Queries auf allen Seiten; Mobile-First-Layout in Home, Raceplan und Activities      |
+| NF3 | Benutzerkonten müssen durch eine sichere Authentifizierung geschützt werden                       | Sicherheit     | Supabase Auth mit gehashten Passwörtern und JWT-Sessions                                      |
+| NF4 | Rollen und Berechtigungen müssen mittels Row Level Security (RLS) abgesichert werden              | Sicherheit     | RLS auf `profiles`, `races`, `strava_activities`; View `strava_activities_overview` für Gäste |
+| NF5 | Personenbezogene Daten werden in einer PostgreSQL-Datenbank innerhalb von Supabase gespeichert    | Datenhaltung   | Tabellen `profiles`, `auth.users`; Hosting in Supabase Cloud                                  |
+| NF6 | Die Anwendung muss eine intuitive und übersichtliche Benutzeroberfläche bereitstellen             | Benutzbarkeit  | Einheitliches Layout mit Navigation; Portfolio-Karten auf der Startseite                      |
+| NF7 | Ungültige Benutzereingaben werden validiert und dem Benutzer verständlich angezeigt               | Benutzbarkeit  | Clientseitige Validierung in Login, Signup, Raceplan-Formular und Profil                      |
+| NF8 | Änderungen an Benutzerdaten, Trainings und Raceplan-Einträgen müssen dauerhaft gespeichert werden | Datenhaltung   | Persistenz in PostgreSQL; Strava-Sync schreibt in `strava_activities`                         |
+
 
 *Tabelle 2.5 – Nicht-funktionale Anforderungen*
 
 **Priorisierung:** Alle nicht-funktionalen Anforderungen wurden als **Muss-Kriterien** behandelt. Besonders kritisch für die Modulbewertung sind NF3 und NF4 (Sicherheit), da das Projekt im Kontext **Public Cloud** steht und sowohl Authentifizierung als auch datenbankseitige Zugriffskontrolle nachweisbar sein müssen.
-
-**Abdeckung durch Tests:** NF3 und NF4 werden in Abschnitt 5.5 (Sicherheits- und RLS-Tests) geprüft; NF6 und NF7 im Rahmen der Abnahmetests (Abschnitt 5.3).
 
 ---
 
@@ -532,99 +557,51 @@ Geplant war ein Gesamtaufwand von **50 Stunden** im Zeitraum 15.06.2026 bis 27.0
 
 #### Projektorganisation
 
-| Aspekt | Festlegung |
-| ------ | ---------- |
-| Projektform | Einzelarbeit |
-| Zeitraum | 15.06.2026 (Kick-off) – 27.06.2026 (Abgabe) |
-| Geplanter Gesamtaufwand | 50 Stunden |
-| Protokollierter Ist-Aufwand (Stand 23.06.2026) | ca. 38,5 Stunden |
-| Auftraggeber | Jan Brawand (fachliche Anforderungen, Strava-OAuth, Feedback) |
-| Entwicklungswerkzeug | Cursor IDE (Code, KI-Unterstützung, Dokumentation) |
+
+| Aspekt                                         | Festlegung                                                    |
+| ---------------------------------------------- | ------------------------------------------------------------- |
+| Projektform                                    | Einzelarbeit                                                  |
+| Zeitraum                                       | 15.06.2026 (Kick-off) – 27.06.2026 (Abgabe)                   |
+| Geplanter Gesamtaufwand                        | 50 Stunden                                                    |
+| Protokollierter Ist-Aufwand (Stand 23.06.2026) | ca. 38,5 Stunden                                              |
+| Auftraggeber                                   | Jan Brawand (fachliche Anforderungen, Strava-OAuth, Feedback) |
+| Entwicklungswerkzeug                           | Cursor IDE (Code, KI-Unterstützung, Dokumentation)            |
+
 
 *Tabelle 3.1 – Projektorganisation*
 
-#### Vorgehensmodell
-
-Das Projekt folgte einem **iterativ-inkrementellen Vorgehen** in vier Phasen. Nach jeder Phase wurde das Ergebnis kurz überprüft, bevor die nächste Phase begann:
-
-```text
-  Phase 1          Phase 2              Phase 3              Phase 4
-  Analyse     →    Infrastruktur   →    Implementierung  →   Abschluss
-  (AP1–AP2)        (AP3–AP4)            (AP5–AP6)            (AP7–AP9)
-       │                │                    │                   │
-       ▼                ▼                    ▼                   ▼
-  User Stories     Supabase + RLS       React-Frontend      Tests + Doku
-  Arbeitsplan      Strava-Anbindung     Integration         Fachgespräch
-```
-
-**Phase 1 – Analyse und Konzeption (15.06.):** Gespräch mit Auftraggeber, Definition von Zielen, User Stories, Rollenmodell und Arbeitspaketen (AP1). Recherche zu Supabase Auth (AP2).
-
-**Phase 2 – Backend und Integration (16.–18.06.):** Supabase-Projekt, Tabellen, RLS, Storage (AP3). Strava OAuth, Edge Functions, Webhook-Versuche (AP4). Mehrere Iterationen bei OAuth-Scopes und Datenmodell.
-
-**Phase 3 – Frontend und Integration (18.–23.06.):** React-App mit allen Seiten, CSS, Storage-Bilder, Admin-Funktionen (AP5). Strava-Sync-Button und CORS-Fix (AP4/AP5). Deployment (AP6) noch ausstehend.
-
-**Phase 4 – Qualitätssicherung und Abgabe (21.–27.06.):** RLS-Tests, Unit-Tests, Code-Review (AP7). Dokumentation (AP8). Vorbereitung Fachgespräch (AP9).
-
 #### Arbeitspakete
 
-| AP | Beschreibung | Soll (h) | Ist (h) | Status (23.06.) |
-| -- | ------------ | -------- | ------- | --------------- |
-| AP1 | Anforderungsanalyse, User Stories, Projektplanung | 4 | 4,75 | Abgeschlossen |
-| AP2 | Architektur, Datenmodell, Systemdesign | 3 | 2,00 | Abgeschlossen |
-| AP3 | Backend (Supabase, Rollen, CRUD, Storage) | 8 | 6,25 | Abgeschlossen |
-| AP4 | Strava-API (OAuth, Token, Sync, Webhook) | 8 | 12,75 | Über Soll; manueller Sync statt produktivem Webhook |
-| AP5 | Frontend (React, Routing, Views, Formulare) | 8 | 11,75 | Über Soll; Kernfunktionen umgesetzt |
-| AP6 | Integration und Deployment | 3 | — | Offen |
-| AP7 | Tests, Fehlerbehebung, Abnahmetests | 4 | 5,25 | Laufend |
-| AP8 | Sicherheitskonzept, Projektdokumentation | 5 | 2,25 | Laufend |
-| AP9 | Vorbereitung Fachgespräch | 2 | — | Offen |
-| AP10 | Zeitreserve / Puffer | 5 | 0,50 | Gering genutzt |
-| | **Summe** | **50** | **38,50** | |
+
+| AP   | Beschreibung                                      | Soll (h) |
+| ---- | ------------------------------------------------- | -------- |
+| AP1  | Anforderungsanalyse, User Stories, Projektplanung | 4        |
+| AP2  | Architektur, Datenmodell, Systemdesign            | 3        |
+| AP3  | Backend (Supabase, Rollen, CRUD, Storage)         | 8        |
+| AP4  | Strava-API (OAuth, Token, Sync, Webhook)          | 8        |
+| AP5  | Frontend (React, Routing, Views, Formulare)       | 8        |
+| AP6  | Integration und Deployment                        | 3        |
+| AP7  | Tests, Fehlerbehebung, Abnahmetests               | 4        |
+| AP8  | Sicherheitskonzept, Projektdokumentation          | 5        |
+| AP9  | Vorbereitung Fachgespräch                         | 2        |
+| AP10 | Zeitreserve / Puffer                              | 5        |
+|      | **Summe**                                         | **50**   |
+
 
 *Tabelle 3.2 – Arbeitspakete mit Soll-/Ist-Vergleich (Ist-Werte aus Arbeitsjournal)*
-
-#### Meilensteine
-
-| Datum | Meilenstein | Arbeitspaket |
-| ----- | ----------- | -------------- |
-| 15.06.2026 | Kick-off mit Auftraggeber; Anforderungen und Arbeitsplan stehen | AP1 |
-| 16.06.2026 | Supabase-Projekt live; Races-CRUD und erste Strava-OAuth-Verbindung | AP3, AP4 |
-| 17.06.2026 | Edge Functions und Storage eingerichtet | AP3, AP4 |
-| 18.06.2026 | `strava_activities`-Tabelle; React-Frontend-Gerüst | AP3, AP5 |
-| 19.06.2026 | Raceplan und Activities im Frontend; CSS und Bilder | AP5 |
-| 20.06.2026 | RLS für Gäste/User; Admin-Prüfung für Raceplan; Activity Details | AP7, AP3 |
-| 21.06.2026 | Profilverwaltung; Unit-Tests; Code-Review | AP5, AP7 |
-| 22.06.2026 | Strava-Sync refaktoriert; Dokumentation Kap. 4 begonnen | AP4, AP8 |
-| 23.06.2026 | Sync-Button in UI; CORS-Fix; Dokumentation Kap. 1–3 | AP4, AP5, AP8 |
-| 27.06.2026 | Projektabschluss, Abgabe, Fachgespräch | AP6, AP8, AP9 |
-
-*Tabelle 3.3 – Projektmeilensteine*
-
-#### Abhängigkeiten zwischen Arbeitspaketen
-
-```text
-  AP1 (Analyse)
-    ├──► AP2 (Architektur)
-    │       └──► AP3 (Backend) ──► AP5 (Frontend)
-    │               └──► AP4 (Strava) ──► AP5
-    └──► AP7 (Tests) ◄── AP5
-              └──► AP8 (Doku) ──► AP9 (Fachgespräch)
-  AP6 (Deployment) ◄── AP3, AP4, AP5
-  AP10 (Puffer) – jederzeit
-```
-
-AP4 (Strava) und AP3 (Backend) mussten vor dem vollständigen Frontend (AP5) weitgehend abgeschlossen sein, da Activities und RLS-Policies die UI-Datenbasis bilden. AP7 (Tests) setzt funktionierende Features aus AP3–AP5 voraus.
 
 #### Planungsanpassungen
 
 Während der Umsetzung wurden folgende Anpassungen gegenüber der ursprünglichen Planung vorgenommen:
 
-| Geplant | Tatsächlich | Grund |
-| ------- | ----------- | ----- |
+
+| Geplant                           | Tatsächlich                     | Grund                                                                                                 |
+| --------------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | Automatischer Strava-Webhook-Sync | Manueller Sync per Admin-Button | Webhook-Troubleshooting zeitaufwändig; UI-Button als pragmatische Lösung (vgl. Arbeitsjournal 22.06.) |
-| `strava_activities` von Anfang an | Zunächst zurückgestellt | Datenmodell unklar; Tabelle erst am 18.06. finalisiert |
-| AP4 innerhalb von 8 h | 12,75 h verbucht | OAuth-Scopes, Polyline-Mapping, CORS, Refactoring |
-| AP5 innerhalb von 8 h | 11,75 h verbucht | CSS, Storage-Pfade, Activity Details, Sync-Button |
+| `strava_activities` von Anfang an | Zunächst zurückgestellt         | Datenmodell unklar; Tabelle erst am 18.06. finalisiert                                                |
+| AP4 innerhalb von 8 h             | 12,75 h verbucht                | OAuth-Scopes, Polyline-Mapping, CORS, Refactoring                                                     |
+| AP5 innerhalb von 8 h             | 11,75 h verbucht                | CSS, Storage-Pfade, Activity Details, Sync-Button                                                     |
+
 
 Die Mehrzeit in AP4 und AP5 wurde teilweise durch geringere Aufwände in AP2 und AP3 kompensiert. AP10 (Puffer) wurde kaum beansprucht, da Probleme direkt in den betroffenen Paketen gelöst wurden.
 
@@ -636,37 +613,41 @@ Für die Umsetzung wurden Technologien gewählt, die zum Modul **210 Public Clou
 
 #### Auswahlkriterien
 
-| Kriterium | Bedeutung für das Projekt |
-| --------- | ------------------------- |
-| Cloud-Fähigkeit | Hosting und Backend in der Public Cloud (Supabase) |
-| Entwicklungsgeschwindigkeit | Einzelprojekt mit begrenztem Zeitbudget (15.–27.06.2026) |
-| Sicherheit | Auth, RLS und serverseitige Strava-Integration (NF3, NF4) |
-| Wartbarkeit | Klare Trennung Frontend / Backend / externe API |
-| Kosten | Nutzung kostenfreier Tiers für Lern- und Demo-Zwecke |
-| Lernziel Modul 210 | Nachweis von BaaS, externer API-Integration und Cloud-Deployment |
+
+| Kriterium                   | Bedeutung für das Projekt                                 |
+| --------------------------- | --------------------------------------------------------- |
+| Cloud-Fähigkeit             | Hosting und Backend in der Public Cloud (Supabase)        |
+| Entwicklungsgeschwindigkeit | Einzelprojekt mit begrenztem Zeitbudget (15.–27.06.2026)  |
+| Sicherheit                  | Auth, RLS und serverseitige Strava-Integration (NF3, NF4) |
+| Wartbarkeit                 | Klare Trennung Frontend / Backend / externe API           |
+| Kosten                      | Nutzung kostenfreier Tiers für Lern- und Demo-Zwecke      |
+| Lernziel Modul 210          | Cloud-Deployment                                          |
+
 
 *Tabelle 3.4 – Auswahlkriterien für Technologien*
 
 #### Technologieübersicht
 
-| Bereich | Technologie | Version / Anmerkung | Einsatz im Projekt |
-| ------- | ----------- | ------------------- | ------------------ |
-| IDE | Cursor | — | Entwicklung, Refactoring, KI-gestützte Codegenerierung |
-| Laufzeit / Build | Node.js, Vite | Vite 8.0.x | Dev-Server, Production-Build |
-| Frontend-Framework | React | 19.2.x | UI-Komponenten, Routing, State |
-| Routing | React Router | 7.18.x | Öffentliche und geschützte Seiten |
-| Backend (BaaS) | Supabase | Cloud (EU) | Auth, DB, Storage, Edge Functions |
-| DB-Client | @supabase/supabase-js | 2.108.x | Frontend-Zugriff auf Auth, DB, Storage, Functions |
-| Datenbank | PostgreSQL | 15 via Supabase | profiles, races, strava_activities |
-| Authentifizierung | Supabase Auth | JWT | Registrierung, Login, Session |
-| Datei-Speicher | Supabase Storage | Bucket `images` | Bilder auf Home und About |
-| Serverlogik | Supabase Edge Functions | Deno | Strava OAuth, Sync, Webhook |
-| Externe API | Strava API v3 | REST + Webhooks | Trainingsdaten des Sportlers |
-| Karten | Leaflet, react-leaflet | 1.9 / 5.x | Routenanzeige in Trainingsdetails |
-| Polyline | @mapbox/polyline | 1.2.x | Decoding der Strava-Routen |
-| Tests | Vitest, Testing Library | Vitest 4.1.x | Unit-Tests für Utils und Auth-Guard |
-| Qualitätssicherung | ESLint | 10.x | Statische Code-Analyse |
-| Versionsverwaltung | Git / GitHub | — | Quellcode, Dokumentation, Deployment |
+
+| Bereich            | Technologie             | Version / Anmerkung | Einsatz im Projekt                                     |
+| ------------------ | ----------------------- | ------------------- | ------------------------------------------------------ |
+| IDE                | Cursor                  | —                   | Entwicklung, Refactoring, KI-gestützte Codegenerierung |
+| Laufzeit / Build   | Node.js, Vite           | Vite 8.0.x          | Dev-Server, Production-Build                           |
+| Frontend-Framework | React                   | 19.2.x              | UI-Komponenten, Routing, State                         |
+| Routing            | React Router            | 7.18.x              | Öffentliche und geschützte Seiten                      |
+| Backend (BaaS)     | Supabase                | Cloud (EU)          | Auth, DB, Storage, Edge Functions                      |
+| DB-Client          | @supabase/supabase-js   | 2.108.x             | Frontend-Zugriff auf Auth, DB, Storage, Functions      |
+| Datenbank          | PostgreSQL              | 15 via Supabase     | profiles, races, strava_activities                     |
+| Authentifizierung  | Supabase Auth           | JWT                 | Registrierung, Login, Session                          |
+| Datei-Speicher     | Supabase Storage        | Bucket `images`     | Bilder auf Home und About                              |
+| Serverlogik        | Supabase Edge Functions | Deno                | Strava OAuth, Sync, Webhook                            |
+| Externe API        | Strava API v3           | REST + Webhooks     | Trainingsdaten des Sportlers                           |
+| Karten             | Leaflet, react-leaflet  | 1.9 / 5.x           | Routenanzeige in Trainingsdetails                      |
+| Polyline           | @mapbox/polyline        | 1.2.x               | Decoding der Strava-Routen                             |
+| Tests              | Vitest, Testing Library | Vitest 4.1.x        | Unit-Tests für Utils und Auth-Guard                    |
+| Qualitätssicherung | ESLint                  | 10.x                | Statische Code-Analyse                                 |
+| Versionsverwaltung | Git / GitHub            | —                   | Quellcode, Dokumentation, Deployment                   |
+
 
 *Tabelle 3.5 – Technologieübersicht*
 
@@ -674,29 +655,25 @@ Für die Umsetzung wurden Technologien gewählt, die zum Modul **210 Public Clou
 
 **React mit Vite**
 
-React wurde gemäss Projektabgrenzung (Abschnitt 1.3) als Frontend-Framework festgelegt. Vite ergänzt React als modernes Build-Tool mit schnellem Dev-Server und schlankem Production-Build. Für eine übersichtliche UI mit mehreren Seiten (Home, About, Raceplan, Activities, Profil) eignet sich die komponentenbasierte Architektur von React.
+React wurde durch die Anforderungen (Abschnitt 7.3) als Frontend-Framework festgelegt. Vite ergänzt React als modernes Build-Tool mit schnellem Dev-Server und schlankem Production-Build. Für eine übersichtliche UI mit mehreren Seiten (Home, About, Raceplan, Activities, Profil) eignet sich die komponentenbasierte Architektur von React.
 
 **Supabase als Backend**
 
 Statt ein eigenes Node-/Express-Backend zu betreiben, wurde Supabase als **Backend-as-a-Service** gewählt. Damit steht in einer Plattform folgendes bereit:
 
-* **PostgreSQL** für strukturierte Daten (Wettkämpfe, Profile, Aktivitäten)
-* **Auth** für Benutzerkonten und JWT-basierte Sessions
-* **Row Level Security (RLS)** für rollenbasierte Zugriffe (Gast, User, Admin)
-* **Storage** für öffentliche Bilder ohne separaten Dateiserver
-* **Edge Functions** für sichere Strava-Integration ohne API-Keys im Frontend
+- **PostgreSQL** für strukturierte Daten (Wettkämpfe, Profile, Aktivitäten)
+- **Auth** für Benutzerkonten und JWT-basierte Sessions
+- **Row Level Security (RLS)** für rollenbasierte Zugriffe (Gast, User, Admin)
+- **Storage** für öffentliche Bilder ohne separaten Dateiserver
+- **Edge Functions** für sichere Strava-Integration ohne API-Keys im Frontend
 
 Diese Kombination reduziert Infrastruktur-Aufwand und entspricht dem Cloud-Fokus des Moduls.
-
-**PostgreSQL und RLS**
-
-PostgreSQL ist robust, relational und gut für die vorliegenden Entitäten (Profile, Races, Activities) geeignet. RLS-Policies werden direkt in der Datenbank definiert und gelten unabhängig vom Frontend — wichtig für NF4 und für geschützte Trainingsdetails (F16). Zusätzlich wird eine **View** (`strava_activities_overview`) genutzt, um Gästen nur eine reduzierte Spaltenmenge anzuzeigen.
 
 **Strava API**
 
 Da die Trainingsdaten des Auftraggebers bereits in Strava vorliegen, ist die Strava API v3 die naheliegende Quelle. OAuth 2.0 ermöglicht die Autorisierung; die API wird ausschliesslich serverseitig (Edge Functions) aufgerufen.
 
-Geplant war ein **Webhook** für automatische Synchronisation bei Create/Update/Delete von Aktivitäten. In der Praxis wurde aus Zeitgründen ein **manueller Sync** über einen Admin-Button in der Trainingsübersicht umgesetzt (Edge Function `sync-strava-activities`). Die Webhook-Infrastruktur (`strava-webhook`, `strava_webhook_events`) ist vorbereitet, aber nicht produktiv im Einsatz.
+Geplant war ein **Webhook** für automatische Synchronisation bei Create/Update/Delete von Aktivitäten. In der Praxis wurde aus Zeitgründen und Erfahrungsmangel ein **manueller Sync** über einen Admin-Button in der Trainingsübersicht umgesetzt (Edge Function `sync-strava-activities`). Die Webhook-Infrastruktur (`strava-webhook`, `strava_webhook_events`) ist vorbereitet, aber nicht produktiv im Einsatz.
 
 **Leaflet und Mapbox Polyline**
 
@@ -714,14 +691,16 @@ Git dient der Versionskontrolle während der gesamten Projektlaufzeit. GitHub ho
 
 #### Bewusst nicht gewählte Alternativen
 
-| Alternative | Grund der Ablehnung |
-| ----------- | ------------------- |
-| Eigenes Node/Express-Backend | Höherer Aufwand; Supabase deckt Auth, DB und API bereits ab |
-| Firebase | PostgreSQL und SQL-basierte RLS passen besser zum Datenmodell |
-| Native Mobile App | Ausserhalb der Projektabgrenzung (Abschnitt 1.3) |
-| Angular / Vue | React ist in der Aufgabenstellung vorgegeben |
-| Eigener Kartenanbieter (Google Maps) | Leaflet ist kostenfrei und für Polyline-Darstellung ausreichend |
-| Direkter Strava-Aufruf aus dem Browser | Access Tokens wären im Client sichtbar; Sicherheitsrisiko |
+
+| Alternative                            | Grund der Ablehnung                                             |
+| -------------------------------------- | --------------------------------------------------------------- |
+| Eigenes Node/Express-Backend           | Höherer Aufwand; Supabase deckt Auth, DB und API bereits ab     |
+| Firebase                               | PostgreSQL und SQL-basierte RLS passen besser zum Datenmodell   |
+| Native Mobile App                      | Ausserhalb der Projektabgrenzung (Abschnitt 1.3)                |
+| Angular / Vue                          | React ist in der Aufgabenstellung vorgegeben                    |
+| Eigener Kartenanbieter (Google Maps)   | Leaflet ist kostenfrei und für Polyline-Darstellung ausreichend |
+| Direkter Strava-Aufruf aus dem Browser | Access Tokens wären im Client sichtbar; Sicherheitsrisiko       |
+
 
 *Tabelle 3.6 – Abgelehnte Alternativen*
 
@@ -729,11 +708,13 @@ Git dient der Versionskontrolle während der gesamten Projektlaufzeit. GitHub ho
 
 Die Webapplikation folgt einer **BaaS-Architektur (Backend as a Service)** mit drei Schichten:
 
-| Schicht | Komponente | Verantwortung |
-| ------- | ---------- | ------------- |
-| Präsentation | React SPA (Vite) | UI, Routing, Formulare, Auth-State |
+
+| Schicht                 | Komponente         | Verantwortung                                   |
+| ----------------------- | ------------------ | ----------------------------------------------- |
+| Präsentation            | React SPA (Vite)   | UI, Routing, Formulare, Auth-State              |
 | Anwendungslogik / Daten | Supabase Plattform | Auth, PostgreSQL + RLS, Storage, Edge Functions |
-| Externe Dienste | Strava API | Trainingsdaten, OAuth |
+| Externe Dienste         | Strava API         | Trainingsdaten, OAuth                           |
+
 
 *Tabelle 3.7 – Architekturschichten*
 
@@ -749,8 +730,8 @@ Das React-Frontend kommuniziert ausschliesslich mit **Supabase**. Die Anbindung 
 #### Strava-Sync-Ablauf (produktiv)
 
 ```text
-  Sportler (Admin)                Edge Function                  Strava API
-        │                    sync-strava-activities                    │
+  Sportler (Admin)                Edge Function                       Strava API
+        │                    sync-strava-activities                       │
         │  Klick «Sync»  ──────────────►  │                               │
         │  (JWT + is_admin)               │  Token abgelaufen?            │
         │                                 │  ──ja──► refresh_token  ────► │
@@ -804,43 +785,45 @@ Das React-Frontend kommuniziert ausschliesslich mit **Supabase**. Die Anbindung 
 
 #### Frontend-Komponenten (Überblick)
 
-| Bereich | Komponenten / Module | Aufgabe |
-| ------- | -------------------- | ------- |
-| Routing | `App.jsx`, `ProtectedRoute` | Öffentliche und geschützte Routen |
-| Auth | `AuthContext`, `Login`, `Signup` | Session-Verwaltung, Registrierung |
-| Öffentliche Seiten | `Home`, `About`, `Raceplan`, `Activities` | Informations- und Übersichtsseiten |
-| Geschützte Seiten | `ActivityDetails`, `Profile` | Details und Profilverwaltung |
-| Layout | `Layout` | Navigation, Header mit Username |
-| Konfiguration | `config/athlete.js` | Statische Sportler-Daten (Name, Ziel, Steckbrief) |
-| Hilfsfunktionen | `utils/` | Formatierung, Filter, Statistik-Gruppen |
+
+| Bereich            | Komponenten / Module                      | Aufgabe                                           |
+| ------------------ | ----------------------------------------- | ------------------------------------------------- |
+| Routing            | `App.jsx`, `ProtectedRoute`               | Öffentliche und geschützte Routen                 |
+| Auth               | `AuthContext`, `Login`, `Signup`          | Session-Verwaltung, Registrierung                 |
+| Öffentliche Seiten | `Home`, `About`, `Raceplan`, `Activities` | Informations- und Übersichtsseiten                |
+| Geschützte Seiten  | `ActivityDetails`, `Profile`              | Details und Profilverwaltung                      |
+| Layout             | `Layout`                                  | Navigation, Header mit Username                   |
+| Konfiguration      | `config/athlete.js`                       | Statische Sportler-Daten (Name, Ziel, Steckbrief) |
+| Hilfsfunktionen    | `utils/`                                  | Formatierung, Filter, Statistik-Gruppen           |
+
 
 *Tabelle 3.8 – Frontend-Struktur*
 
 #### Edge Functions und Shared Modules
 
-| Function / Modul | Pfad | Aufgabe |
-| ---------------- | ---- | ------- |
-| `sync-strava-activities` | `supabase/functions/sync-strava-activities/` | Manueller Vollsync mit Token-Refresh |
-| `strava-sync` | `supabase/functions/strava-sync/` | Einzelaktivität synchronisieren |
-| `strava-webhook` | `supabase/functions/strava-webhook/` | Webhook-Empfang und Deduplizierung |
-| `_shared/strava/oauth.ts` | Shared | Token-Refresh-Logik |
-| `_shared/strava/mapper.ts` | Shared | Strava-JSON → DB-Zeile |
-| `_shared/sync/sync-all.ts` | Shared | Batch-Sync aller Aktivitäten |
+
+| Function / Modul         | Pfad                                         | Aufgabe                                                 |
+| ------------------------ | -------------------------------------------- | ------------------------------------------------------- |
+| `sync-strava-activities` | `supabase/functions/sync-strava-activities/` | Manueller Vollsync mit Token-Refresh                    |
+| `strava_sync`            | `supabase/functions/strava-sync/`            | Token aktualisieren                                     |
+| `strava_webhook`         | `supabase/functions/strava-webhook/`         | Webhook-Empfang und Deduplizierung (funktioniert nicht) |
+| `strava_initial_sync`    | `supabase/functions/strava_initial_sync`     | Initiale befüllung der Tabelle `strava_activities`      |
+
 
 *Tabelle 3.9 – Serverseitige Integrationslogik*
 
-Shared Modules werden per TypeScript-Import eingebunden — es gibt keine HTTP-Aufrufe zwischen eigenen Functions.
-
 #### Architekturentscheidungen
 
-| Aspekt | Begründung |
-| ------ | ---------- |
-| Kein direkter Frontend-Zugriff auf Strava | Access Tokens und API-Keys bleiben serverseitig in Edge Functions |
-| Auth und DB unter Supabase | Beide Dienste gehören zur gleichen Plattform; das Frontend nutzt einen gemeinsamen Supabase-Client |
-| RLS auf PostgreSQL | Rollen (Gast, User, Admin) werden auf Datenbankebene durchgesetzt (vgl. NF4) |
-| View für Aktivitätsübersicht | Gäste sehen nur reduzierte Felder, ohne Zugriff auf die Volltabelle |
-| Edge Functions als Integrationslayer | Token-Pflege, Sync und Webhook zentral; Frontend triggert nur den Sync |
-| Statische Athleten-Daten im Frontend | Name, Ziel und Steckbrief ändern sich selten; kein CMS nötig |
+
+| Aspekt                                    | Begründung                                                                                         |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Kein direkter Frontend-Zugriff auf Strava | Access Tokens und API-Keys bleiben serverseitig in Edge Functions                                  |
+| Auth und DB unter Supabase                | Beide Dienste gehören zur gleichen Plattform; das Frontend nutzt einen gemeinsamen Supabase-Client |
+| RLS auf PostgreSQL                        | Rollen (Gast, User, Admin) werden auf Datenbankebene durchgesetzt (vgl. NF4)                       |
+| View für Aktivitätsübersicht              | Gäste sehen nur reduzierte Felder, ohne Zugriff auf die Volltabelle                                |
+| Edge Functions als Integrationslayer      | Token-Pflege, Sync und Webhook zentral; Frontend triggert nur den Sync                             |
+| Statische Athleten-Daten im Frontend      | Name, Ziel und Steckbrief ändern sich selten; kein CMS nötig                                       |
+
 
 *Tabelle 3.10 – Architekturentscheidungen*
 
@@ -856,31 +839,33 @@ Das Datenmodell bildet die Entitäten des Systems in PostgreSQL ab. Es umfasst f
        │ 1:1
        ▼
   profiles ─────────────────────────────────────────┐
-  (id, username, role)                            │
-                                                  │
-  races                                           │  (kein FK –
-  (Wettkampfdaten, CRUD durch Admin)              │   ein Sportler)
-                                                  │
-  strava_activities ◄── Sync ── strava_connection │
-  (Trainingsdaten aus Strava)      (OAuth-Tokens) │
-                                                  │
-  strava_webhook_events                           │
-  (Deduplizierung Webhook-Events)                 │
-                                                  │
-  strava_activities_overview (View)               │
-  (reduzierte Spalten für Gäste)                  │
+  (id, username, role)                              │
+                                                    │
+  races                                             │  (kein FK –
+  (Wettkampfdaten, CRUD durch Admin)                │   ein Sportler)
+                                                    │
+  strava_activities ◄── Sync ── strava_connection   │
+  (Trainingsdaten aus Strava)      (OAuth-Tokens)   │
+                                                    │
+  strava_webhook_events                             │
+  (Deduplizierung Webhook-Events)                   │
+                                                    │
+  strava_activities_overview (View)                 │
+  (reduzierte Spalten für Gäste)                    │
 ```
 
 #### Tabellen im Überblick
 
-| Tabelle / View | Zweck | Schreibzugriff |
-| -------------- | ----- | -------------- |
-| `profiles` | Benutzerprofil mit Rolle | User (eigenes Profil), Trigger bei Signup |
-| `races` | Wettkampfplan | Admin (CRUD), alle (READ) |
-| `strava_activities` | Vollständige Trainingsdaten | Edge Functions (UPSERT), User (READ) |
-| `strava_activities_overview` | Öffentliche Trainingsliste | View (READ für alle) |
-| `strava_connection` | OAuth-Tokens für Strava | Edge Functions |
-| `strava_webhook_events` | Webhook-Deduplizierung | Edge Functions |
+
+| Tabelle / View               | Zweck                       | Schreibzugriff                            |
+| ---------------------------- | --------------------------- | ----------------------------------------- |
+| `profiles`                   | Benutzerprofil mit Rolle    | User (eigenes Profil), Trigger bei Signup |
+| `races`                      | Wettkampfplan               | Admin (CRUD), alle (READ)                 |
+| `strava_activities`          | Vollständige Trainingsdaten | Edge Functions (UPSERT), User (READ)      |
+| `strava_activities_overview` | Öffentliche Trainingsliste  | View (READ für alle)                      |
+| `strava_connection`          | OAuth-Tokens für Strava     | Edge Functions                            |
+| `strava_webhook_events`      | Webhook-Deduplizierung      | Edge Functions                            |
+
 
 *Tabelle 3.11 – Tabellenübersicht*
 
@@ -888,12 +873,14 @@ Das Datenmodell bildet die Entitäten des Systems in PostgreSQL ab. Es umfasst f
 
 Verknüpft Supabase-Auth-Benutzer mit Anwendungsdaten. `id` ist gleichzeitig Primary Key und Foreign Key auf `auth.users.id`.
 
-| Attribut | Datentyp | Beschreibung |
-| -------- | -------- | ------------ |
-| id | uuid (PK/FK) | Referenz auf `auth.users` |
-| username | text | Anzeigename, bei Registrierung gesetzt |
-| role | text | `user` (Standard) oder `admin` (Sportler) |
-| created_at | timestamp | Erstellungszeitpunkt |
+
+| Attribut   | Datentyp     | Beschreibung                              |
+| ---------- | ------------ | ----------------------------------------- |
+| id         | uuid (PK/FK) | Referenz auf `auth.users`                 |
+| username   | text         | Anzeigename, bei Registrierung gesetzt    |
+| role       | text         | `user` (Standard) oder `admin` (Sportler) |
+| created_at | timestamp    | Erstellungszeitpunkt                      |
+
 
 **Trigger:** `handle_new_user` legt bei Signup automatisch eine Profilzeile an.
 
@@ -901,58 +888,64 @@ Verknüpft Supabase-Auth-Benutzer mit Anwendungsdaten. `id` ist gleichzeitig Pri
 
 Speichert geplante und vergangene Wettkämpfe. Wird vom Sportler über die Raceplan-UI gepflegt.
 
-| Attribut | Datentyp | Beschreibung |
-| -------- | -------- | ------------ |
-| id | int8 (PK) | Autoinkrement |
-| name | text | Name des Wettkampfs |
-| location | text | Austragungsort |
-| country_code | varchar(2) | ISO-Ländercode |
-| race_date | date | Datum des Events |
-| discipline | text | Sportart (z. B. Triathlon) |
-| distance | text | Distanz (z. B. Ironman, Half) |
-| event_link | text | Link zur offiziellen Veranstaltungsseite |
-| goal | text | Persönliches Ziel für den Wettkampf |
-| result | text | Ergebnis nach Abschluss (optional) |
-| updated_at | timestamp | Letzte Änderung |
-| created_at | timestamp | Erstellungszeitpunkt |
+
+| Attribut     | Datentyp   | Beschreibung                             |
+| ------------ | ---------- | ---------------------------------------- |
+| id           | int8 (PK)  | Autoinkrement                            |
+| name         | text       | Name des Wettkampfs                      |
+| location     | text       | Austragungsort                           |
+| country_code | varchar(2) | ISO-Ländercode                           |
+| race_date    | date       | Datum des Events                         |
+| discipline   | text       | Sportart (z. B. Triathlon)               |
+| distance     | text       | Distanz (z. B. Ironman, Half)            |
+| event_link   | text       | Link zur offiziellen Veranstaltungsseite |
+| goal         | text       | Persönliches Ziel für den Wettkampf      |
+| result       | text       | Ergebnis nach Abschluss (optional)       |
+| updated_at   | timestamp  | Letzte Änderung                          |
+| created_at   | timestamp  | Erstellungszeitpunkt                     |
+
+
+*Für die Spalten `distance`, `goal`und `result` wurden bewusst der Datentyp text gewählt, da es sich um die Ironman-Vorbereitung (drei Disziplinen) handelt. Die Möglichkeit von separaten Tabellen mit Beziehung wurde in Betracht gezogen und vom Auftraggeber aus Gründen der höheren Flexiblilität mit Text-Feldern abgelehnt*
 
 #### Tabelle `strava_activities`
 
 Enthält synchronisierte Trainingsdaten aus der Strava API. `strava_activity_id` ist der natürliche Schlüssel für Upserts beim Sync.
 
-| Attribut | Datentyp | Beschreibung |
-| -------- | -------- | ------------ |
-| id | int8 (PK) | Interne ID |
-| strava_activity_id | int8 (unique) | ID auf Strava |
-| name | text | Aktivitätsname |
-| sport_type | text | Sportart (Run, Ride, Swim, …) |
-| start_date | timestamp | Startzeit (UTC) |
-| start_date_local | timestamp | Startzeit (lokal) |
-| distance | numeric | Distanz in Metern |
-| moving_time | int4 | Bewegungszeit in Sekunden |
-| elapsed_time | int4 | Gesamtzeit in Sekunden |
-| total_elevation_gain | numeric | Höhenmeter gesamt |
-| elev_low | numeric | Minimale Höhe |
-| elev_high | numeric | Maximale Höhe |
-| average_speed | numeric | Durchschnittsgeschwindigkeit |
-| max_speed | numeric | Maximalgeschwindigkeit |
-| device_watts | boolean | Leistungsmesser vorhanden |
-| average_watts | numeric | Durchschnittsleistung |
-| weighted_average_watts | numeric | Gewichtete Durchschnittsleistung |
-| max_watts | numeric | Maximalleistung |
-| has_heartrate | boolean | Herzfrequenz vorhanden |
-| average_heartrate | numeric | Durchschnittspuls |
-| max_heartrate | numeric | Maximalpuls |
-| kilojoules | numeric | Energieumsatz |
-| location_city | text | Stadt (aus Strava) |
-| location_state | text | Region (aus Strava) |
-| summary_polyline | text | Encodierte Route für Karte |
-| start_latlng | numeric[] | Startkoordinaten |
-| end_latlng | numeric[] | Endkoordinaten |
-| raw_data | jsonb | Vollständiges Strava-JSON |
-| synced_at | timestamp | Zeitpunkt des letzten Syncs |
-| created_at | timestamp | Erstellungszeitpunkt |
-| updated_at | timestamp | Letzte Aktualisierung |
+
+| Attribut               | Datentyp      | Beschreibung                     |
+| ---------------------- | ------------- | -------------------------------- |
+| id                     | int8 (PK)     | Interne ID                       |
+| strava_activity_id     | int8 (unique) | ID auf Strava                    |
+| name                   | text          | Aktivitätsname                   |
+| sport_type             | text          | Sportart (Run, Ride, Swim, …)    |
+| start_date             | timestamp     | Startzeit (UTC)                  |
+| start_date_local       | timestamp     | Startzeit (lokal)                |
+| distance               | numeric       | Distanz in Metern                |
+| moving_time            | int4          | Bewegungszeit in Sekunden        |
+| elapsed_time           | int4          | Gesamtzeit in Sekunden           |
+| total_elevation_gain   | numeric       | Höhenmeter gesamt                |
+| elev_low               | numeric       | Minimale Höhe                    |
+| elev_high              | numeric       | Maximale Höhe                    |
+| average_speed          | numeric       | Durchschnittsgeschwindigkeit     |
+| max_speed              | numeric       | Maximalgeschwindigkeit           |
+| device_watts           | boolean       | Leistungsmesser vorhanden        |
+| average_watts          | numeric       | Durchschnittsleistung            |
+| weighted_average_watts | numeric       | Gewichtete Durchschnittsleistung |
+| max_watts              | numeric       | Maximalleistung                  |
+| has_heartrate          | boolean       | Herzfrequenz vorhanden           |
+| average_heartrate      | numeric       | Durchschnittspuls                |
+| max_heartrate          | numeric       | Maximalpuls                      |
+| kilojoules             | numeric       | Energieumsatz                    |
+| summary_polyline       | text          | Encodierte Route für Karte       |
+| start_latlng           | numeric       | Startkoordinaten                 |
+| end_latlng             | numeric       | Endkoordinaten                   |
+| raw_data               | jsonb         | Vollständiges Strava-JSON        |
+| synced_at              | timestamp     | Zeitpunkt des letzten Syncs      |
+| created_at             | timestamp     | Erstellungszeitpunkt             |
+| updated_at             | timestamp     | Letzte Aktualisierung            |
+
+
+*`location_city`, `location_state` und `location_country` wurde vom Auftraggeber im Strava-Profil aus Datenschutz-Gründen blockiert (Rückgabe ist `NULL`)*
 
 #### View `strava_activities_overview`
 
@@ -962,209 +955,341 @@ Reduzierte Sicht für Gäste. Enthält nur: `id`, `name`, `distance`, `moving_ti
 
 Speichert die OAuth-Verbindung zum Strava-Konto des Sportlers (eine Zeile, `id = 1`). Wird von den Edge Functions für Token-Refresh und Sync verwendet.
 
-| Attribut | Datentyp | Beschreibung |
-| -------- | -------- | ------------ |
-| id | int8 (PK) | Immer `1` (Single-Athlete-Setup) |
-| access_token | text | Aktuelles Strava Access Token |
-| refresh_token | text | Token zum Erneuern |
-| expires_at | timestamptz | Ablaufzeit des Access Tokens |
-| last_sync | timestamptz | Zeitpunkt des letzten erfolgreichen Syncs |
-| updated_at | timestamptz | Letzte Änderung |
-| created_at | timestamptz | Erstellungszeitpunkt |
+
+| Attribut      | Datentyp    | Beschreibung                              |
+| ------------- | ----------- | ----------------------------------------- |
+| id            | int8 (PK)   | Immer `1` (Single-Athlete-Setup)          |
+| athlete_id    | int8        | ID aus Strava `athlete`                   |
+| access_token  | text        | Aktuelles Strava Access Token             |
+| refresh_token | text        | Token zum Erneuern                        |
+| expires_at    | timestamptz | Ablaufzeit des Access Tokens              |
+| last_sync     | timestamptz | Zeitpunkt des letzten erfolgreichen Syncs |
+| updated_at    | timestamptz | Letzte Änderung (Token-Refresh)           |
+
 
 #### Tabelle `strava_webhook_events`
 
 Deduplizierung eingehender Strava-Webhook-Events. Strava kann dasselbe Event mehrfach senden; `event_id` ist eindeutig.
 
-| Attribut | Datentyp | Beschreibung |
-| -------- | -------- | ------------ |
-| id | int8 (PK) | Interne ID |
-| event_id | int8 (unique) | Strava-Event-ID |
-| object_id | int8 | Betroffene Aktivitäts-ID |
-| received_at | timestamptz | Empfangszeitpunkt |
+
+| Attribut    | Datentyp      | Beschreibung             |
+| ----------- | ------------- | ------------------------ |
+| id          | int8 (PK)     | Interne ID               |
+| event_id    | int8 (unique) | Strava-Event-ID          |
+| object_id   | int8          | Betroffene Aktivitäts-ID |
+| received_at | timestamptz   | Empfangszeitpunkt        |
+
+
+*Da Webhook-Subscription nicht geklappt hat, ist diese Tabelle in Supabase leer geblieben*
 
 #### SQL-Artefakte im Repository
 
 Die RLS-Policies und Hilfsfunktionen liegen als SQL-Dateien im Ordner `supabase/`:
 
-| Datei | Inhalt |
-| ----- | ------ |
-| `rls-races.sql` | `is_admin()`-Funktion; SELECT/INSERT/UPDATE/DELETE-Policies für `races` |
-| `rls-activities.sql` | View `strava_activities_overview`; SELECT-Policies für Gäste und User |
-| `profiles-trigger.sql` | Trigger `handle_new_user`; RLS für `profiles` |
-| `profiles-delete-account.sql` | Policy und Logik zum Kontolöschen |
+
+| Datei                         | Inhalt                                                                  |
+| ----------------------------- | ----------------------------------------------------------------------- |
+| `rls-races.sql`               | `is_admin()`-Funktion; SELECT/INSERT/UPDATE/DELETE-Policies für `races` |
+| `rls-activities.sql`          | View `strava_activities_overview`; SELECT-Policies für Gäste und User   |
+| `profiles-trigger.sql`        | Trigger `handle_new_user`; RLS für `profiles`                           |
+| `profiles-delete-account.sql` | Policy und Logik zum Kontolöschen                                       |
+| `strava-webhook-events.sql`   | Erstellung von `strava_webhook_events`; Trigger auf `object_id`         |
+
 
 *Tabelle 3.12 – SQL-Dateien für Datenbankschema*
 
-
-
 ## 4. Umsetzung
+
+Der Umsetzungsabschnitt beschreibt, wie die in Kapitel 3 geplante Architektur in der Praxis realisiert wurde. Die Arbeit gliederte sich in vier Schichten: **Supabase-Backend** (Datenbank, Auth, Storage, Edge Functions), **Strava-Anbindung**, **React-Frontend** und **Deployment** inklusive CI. Das Backend wurde ausschliesslich über das **Supabase Dashboard** eingerichtet und deployed — die **Supabase CLI** wurde im Projekt nicht verwendet.
 
 ### 4.1 Entwicklungsumgebung
 
-Folgende Werkzeuge wurden eingerichtet:
+#### Werkzeuge und Projektstruktur
 
-* Cursor
-* Node.js
-* React
-* Git
-* Supabase
 
-### 4.2 Datenbank
+| Werkzeug                    | Einsatz                                                                               |
+| --------------------------- | ------------------------------------------------------------------------------------- |
+| **Cursor IDE**              | Code, Refactoring, KI-gestützte Implementierung (u. a. Edge Functions, Leaflet-Karte) |
+| **Node.js / npm**           | Frontend-Build, Dev-Server, Vitest                                                    |
+| **Git / GitHub**            | Versionskontrolle, Pull Requests, GitHub Actions                                      |
+| **Supabase Dashboard**      | Tabellen, RLS, Storage, Edge Functions, Secrets — ohne CLI                            |
+| **Strava Developer Portal** | OAuth-App, manuelle Token-Beschaffung mit Auftraggeber                                |
 
-Für die Speicherung der Daten wurde PostgreSQL von Supabase verwendet.
 
-Erstellte Tabellen:
+*Tabelle 4.1 – Entwicklungswerkzeuge*
 
-* profiles
-* races
-* strava_activities
-* strava_connection
-* strava_webhook_events
+Das Repository ist in zwei Hauptbereiche gegliedert:
+
+```text
+210_public_cloud/
+├── webpage-jabra/              # React-Frontend (Vite)
+│   ├── src/components/         # Seiten und UI
+│   ├── src/context/            # AuthContext
+│   ├── src/utils/              # Hilfsfunktionen (Filter, Formatierung)
+│   ├── src/config/athlete.js   # Statische Sportler-Daten
+│   └── tests/                  # Vitest Unit-Tests
+└── supabase/
+    ├── *.sql                   # RLS, Trigger, Views (SQL Editor)
+    └── functions/*.md          # Edge-Function-Quellcode als Referenz
+```
+
+Der Frontend-Code liegt unter `webpage-jabra/`. SQL-Artefakte und Edge-Function-Quelltexte werden im Repo versioniert; angewendet bzw. deployed werden sie im **Supabase Dashboard**.
+
+#### Lokale Konfiguration
+
+Für die lokale Frontend-Entwicklung wird eine `.env.local` im Ordner `webpage-jabra/` benötigt:
+
+
+| Variable                        | Zweck                                                   |
+| ------------------------------- | ------------------------------------------------------- |
+| `VITE_SUPABASE_URL`             | Supabase-Projekt-URL für Auth, DB und Storage           |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Öffentlicher Anon-Key für den Supabase-Client           |
+| `VITE_API_URL`                  | Basis-URL für direkte `fetch`-Aufrufe an Edge Functions |
+
+
+Die Secrets (Strava Client Secret, Service Role Key) werden **nicht** im Frontend gespeichert, sondern nur als Edge-Function-Secrets in Supabase.
+
+### 4.2 Datenbank und Backend
+
+#### Einrichtung über Supabase Dashboard
+
+Tabellen, Views, Trigger und RLS-Policies wurden im Supabase Dashboard angelegt. Die Skripte aus dem Ordner `supabase/` wurden nacheinander im **SQL Editor** ausgeführt (vgl. Tabelle 3.12 in Abschnitt 3.4).
+
+
+| Schritt          | Vorgehen im Dashboard                                                                                             |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Tabellen anlegen | `profiles`, `races`, `strava_activities`, `strava_connection`, `strava_webhook_events` über Table Editor bzw. SQL |
+| Trigger & Profil | `profiles-trigger.sql` — `handle_new_user` bei Registrierung                                                      |
+| Kontolöschung    | `profiles-delete-account.sql` — RPC `delete_own_account`                                                          |
+| Wettkampf-RLS    | `rls-races.sql` — `is_admin()`, CRUD-Policies für `races`                                                         |
+| Aktivitäts-RLS   | `rls-activities.sql` — View `strava_activities_overview`, SELECT-Policies                                         |
+| Webhook-Tabelle  | `strava-webhook-events.sql` — Deduplizierung (Tabelle bleibt leer, vgl. Abschnitt 4.4)                            |
+| Admin-Rolle      | Manuell: `UPDATE profiles SET role = 'admin'` für den Sportler                                                    |
+| Storage          | Öffentlicher Bucket `images` für Home- und About-Bilder                                                           |
+
+
+*Tabelle 4.2 – Backend-Einrichtung im Supabase Dashboard*
+
+#### Row Level Security in der Praxis
+
+Die RLS-Policies wurden während der Umsetzung mehrfach nachjustiert (vgl. Arbeitsjournal 19.–23.06.):
+
+- Nach Neuerstellung der Tabelle `strava_activities` fehlten zunächst Policies → leere Trainingsliste in der UI.
+- Die View `strava_activities_overview` benötigte eine explizite SELECT-Policy für Gäste (`using (true)`).
+- Raceplan-UPDATE/DELETE schlug fehl, weil die entsprechenden Policies in Supabase noch fehlten; das SQL-Skript `rls-races.sql` wurde idempotent ergänzt und erneut im Dashboard ausgeführt.
+
+Damit gilt: Die Berechtigungslogik ist im Code (SQL-Dateien) dokumentiert, die **authoritative Konfiguration** liegt in der Supabase-Cloud-Instanz.
 
 ### 4.3 Authentifizierung
 
-Die Authentifizierung wurde mit Supabase Auth umgesetzt.
+Die Authentifizierung basiert auf **Supabase Auth** (E-Mail/Passwort, JWT-Sessions). Das Frontend kapselt den Session-State in einem zentralen `AuthContext`.
 
-Funktionen:
+#### Registrierung und Login
 
-* Registrierung
-* Login
-* Logout
-* Rollenprüfung
 
-### 4.4 Strava Integration
+| Funktion          | Komponente / Mechanismus                                                         |
+| ----------------- | -------------------------------------------------------------------------------- |
+| Registrierung     | `Signup.jsx` — `supabase.auth.signUp()` mit `username` in User-Metadata          |
+| Profil anlegen    | DB-Trigger `handle_new_user` → Zeile in `profiles` mit `role = 'user'`           |
+| Login             | `Login.jsx` — `supabase.auth.signInWithPassword()`                               |
+| Logout            | `Layout.jsx` — `supabase.auth.signOut()`                                         |
+| Session-State     | `AuthContext.jsx` — `getSession()`, `onAuthStateChange`, Username aus `profiles` |
+| Geschützte Routen | `ProtectedRoute.jsx` — Redirect zu `/login` ohne Session                         |
+| Profil bearbeiten | `Profile.jsx` — UPDATE auf `profiles.username`                                   |
+| Konto löschen     | `Profile.jsx` — RPC `delete_own_account`                                         |
 
-Die Strava API wurde über OAuth 2.0 angebunden. Die serverseitige Logik liegt in **Supabase Edge Functions** unter `supabase/functions/`. Geteilte Hilfsmodule (`_shared/`) werden per TypeScript-Import eingebunden — es gibt keine HTTP-Aufrufe zwischen eigenen Functions.
 
-#### Ordnerstruktur
+*Tabelle 4.3 – Authentifizierung und Profilverwaltung*
 
-```text
-supabase/functions/
-├── _shared/
-│   ├── supabase.ts              # Admin-Client (Service Role)
-│   ├── strava/
-│   │   ├── types.ts             # Typen für Connection und Webhook-Events
-│   │   ├── oauth.ts             # Token prüfen und bei Bedarf refreshen
-│   │   ├── client.ts            # Strava REST API (Einzelaktivität, Listenabruf)
-│   │   └── mapper.ts            # Mapping Strava → Datenbankzeile
-│   └── sync/
-│       ├── sync-activity.ts     # Eine Aktivität laden/löschen
-│       └── sync-all.ts          # Vollsync seit last_sync (mit Pagination)
-├── strava-webhook/
-│   └── index.ts                 # Webhook-Endpoint (Haupteinstieg)
-└── strava-sync/
-    └── index.ts                 # Manueller Vollsync (POST)
-```
+#### Rollenprüfung
 
-#### Edge Functions
+Admin-Funktionen (Raceplan-CRUD, Strava-Sync) werden im Frontend über `supabase.rpc('is_admin')` gesteuert. Die eigentliche Durchsetzung erfolgt zusätzlich auf Datenbankebene durch RLS-Policies, die `public.is_admin()` aufrufen (vgl. Abschnitt 6.4).
 
-| Function | Endpoint | Zweck |
-| -------- | -------- | ----- |
-| `strava-webhook` | `GET/POST …/functions/v1/strava-webhook` | Strava-Webhook: Subscription-Verifikation und Event-Verarbeitung |
-| `strava-sync` | `POST …/functions/v1/strava-sync` | Manueller Vollsync aller Aktivitäten seit `last_sync` |
+### 4.4 Strava-Integration
 
-Die OAuth-Autorisierung (`strava_auth`) wurde separat umgesetzt und speichert Access Token, Refresh Token und Ablaufzeit in `strava_connection`.
+Die Strava API v3 wurde über **OAuth 2.0** angebunden. Access Token, Refresh Token und Ablaufzeit liegen in der Tabelle `strava_connection` (eine Zeile, `id = 1`). Die OAuth-Autorisierung wurde **manuell mit dem Auftraggeber** durchgeführt und die Tokens direkt in der Datenbank gespeichert — nicht über eine produktive Edge Function im laufenden Betrieb.
 
-#### Webhook-Ablauf
+#### Produktiver Sync-Weg
 
-Strava sendet bei neuen, geänderten oder gelöschten Aktivitäten ein POST-Event. Der Webhook antwortet **sofort mit HTTP 200** (Strava erwartet eine Antwort innerhalb von ca. 2 Sekunden) und verarbeitet das Event anschliessend asynchron über `EdgeRuntime.waitUntil()`.
+Im Normalbetrieb synchronisiert der Sportler Trainings **manuell** über einen Button in der Trainingsübersicht. Der Ablauf:
 
 ```text
-Strava POST (create / update / delete)
-  → Event validieren (nur object_type = activity)
-  → In strava_webhook_events speichern (Deduplizierung per event_id)
-  → Sofort HTTP 200 an Strava
-  → Hintergrund:
-       create/update → Token prüfen → GET /activities/{object_id} → upsert
-       delete        → DELETE aus strava_activities
+  Sportler (Admin)        React (Activities.jsx)       Edge Function              Strava API
+        │                       │                 sync-strava-activities              │
+        │  «synchronisieren»    │                          │                          │
+        │  ────────────────────►│  POST + JWT              │                          │
+        │                       │  ──────────────────────► │                          │
+        │                       │                          │  Token abgelaufen?       │
+        │                       │                          │  ──ja──► refresh_token ─►│
+        │                       │                          │  GET /athlete/activities │
+        │                       │                          │  (after=last_sync) ────► │
+        │                       │                          │  UPSERT strava_activities│
+        │                       │  ◄── JSON { synced: n } ─│  UPDATE last_sync        │
+        │  ◄── Erfolgsmeldung ──│  Liste neu laden         │                          │
 ```
 
-| aspect_type | Aktion |
-| ----------- | ------ |
-| `create` | Einzelne Aktivität per `object_id` von Strava laden und in `strava_activities` upserten |
-| `update` | Aktivität erneut laden und upserten |
-| `delete` | Zeile mit `strava_activity_id = object_id` aus `strava_activities` löschen |
+Der Frontend-Aufruf nutzt `fetch` mit dem Session-JWT und dem Anon-Key (nicht `supabase.functions.invoke`), da die Edge Function CORS-Header für Browser-Requests bereitstellt (vgl. Arbeitsjournal 23.06.).
 
-Bei der Subscription-Verifikation (GET) gibt der Webhook den `hub.challenge`-Wert zurück und prüft optional den `STRAVA_VERIFY_TOKEN`.
+#### Edge Functions — Stand der Umsetzung
 
-#### Token-Management
+Die serverseitige Logik liegt in **Supabase Edge Functions** (Deno). Der Quellcode wird im Repository als Markdown-Referenzdateien unter `supabase/functions/` geführt und im **Supabase Dashboard** unter *Edge Functions* angelegt und deployed.
 
-Das Token-Refresh ist keine eigene deployte Function, sondern eine interne Hilfsfunktion in `_shared/strava/oauth.ts`:
+Ursprünglich war eine modulare Struktur mit gemeinsamem Ordner `_shared/` geplant. Diese wurde im Verlauf des Refactorings (22.06.) **wieder entfernt**: Die produktive Function `sync-strava-activities` enthält Token-Refresh, API-Aufrufe und DB-Upsert in **einer** Datei.
 
-1. Verbindung aus `strava_connection` laden (id = 1)
-2. Prüfen, ob `expires_at` abgelaufen ist
-3. Falls ja: neues Access Token via `refresh_token` bei Strava anfordern und in der DB speichern
-4. Gültiges Access Token an den API-Aufruf weitergeben
 
-Diese Logik wird sowohl vom Webhook (Einzelaktivität) als auch vom manuellen Vollsync (`strava-sync`) verwendet.
+| Function                 | Referenz im Repo            | Zweck                                                                  | Produktiv      |
+| ------------------------ | --------------------------- | ---------------------------------------------------------------------- | -------------- |
+| `sync-strava-activities` | `sync-strava-activities.md` | Vollsync seit `last_sync` inkl. Token-Refresh; vom Frontend getriggert | **Ja**         |
+| `strava_initial_sync`    | `strava_initial_sync.md`    | Einmaliger Import ab 01.04.2026 (Pagination, 200 pro Seite)            | Einmalig       |
+| `strava_sync`            | `strava_sync.md`            | **Nur** Token-Refresh in `strava_connection` — kein Aktivitätenimport  | Hilfs-Function |
+| `strava-webhook`         | (früherer Entwurf)          | Webhook-Empfang und Event-Verarbeitung                                 | **Nein**       |
 
-#### Vollsync (strava-sync)
 
-Der Vollsync lädt alle Aktivitäten seit dem Zeitpunkt `last_sync` aus `strava_connection` (mit Pagination, 50 pro Seite), speichert sie in `strava_activities` und aktualisiert `last_sync`. Er wird eingesetzt für:
+*Tabelle 4.4 – Edge Functions*
 
-* Erstes OAuth-Setup (Initialimport)
-* Manuellen Nachsync per POST auf `strava-sync`
-* Optional: periodischen Cron-Job als Sicherheitsnetz
+**Hinweis zu `strava_sync`:** Diese Function prüft `expires_at` und erneuert bei Bedarf das Access Token über den Strava-Endpoint `/oauth/token`. Sie lädt **keine** Aktivitäten. Der produktive Sync in `sync-strava-activities` enthält dieselbe Refresh-Logik inline und wird daher für den laufenden Betrieb verwendet.
 
-Im Normalbetrieb hält der **Webhook** die Datenbank automatisch aktuell; ein Vollsync ist nur bei Bedarf nötig.
+#### Ablauf `sync-strava-activities` (Kernlogik)
 
-#### Secrets (Supabase Edge Functions)
+1. POST-Request entgegennehmen (OPTIONS für CORS)
+2. Service-Role-Client erstellen; Verbindung aus `strava_connection` laden
+3. Access Token prüfen; bei Ablauf Refresh über `STRAVA_CLIENT_ID` / `STRAVA_CLIENT_SECRET`
+4. Aktivitäten seit `last_sync` paginiert abrufen (50 pro Seite)
+5. Mapping Strava-JSON → Datenbankzeile (`summary_polyline` aus `activity.map`)
+6. UPSERT in `strava_activities` (`onConflict: strava_activity_id`)
+7. `last_sync` aktualisieren; Anzahl synchronisierter Einträge zurückgeben
 
-| Secret | Verwendung |
-| ------ | ---------- |
-| `SUPABASE_URL` | Automatisch gesetzt |
-| `SUPABASE_SERVICE_ROLE_KEY` | Automatisch gesetzt |
-| `STRAVA_CLIENT_ID` | OAuth und Token-Refresh |
-| `STRAVA_CLIENT_SECRET` | OAuth und Token-Refresh |
-| `STRAVA_VERIFY_TOKEN` | Webhook-Subscription-Verifikation |
+#### Webhook — geplant, nicht umgesetzt
 
-#### Webhook bei Strava registrieren
+Für automatische Synchronisation bei Create/Update/Delete von Strava-Aktivitäten wurde ein Webhook-Ansatz evaluiert. Die Tabelle `strava_webhook_events` und ein Entwurf der Function `strava-webhook` wurden angelegt, die **Subscription bei Strava konnte jedoch nicht erfolgreich in Betrieb genommen werden** (vgl. Arbeitsjournal 18. und 22.06.).
 
-```bash
-curl -X POST https://www.strava.com/api/v3/push_subscriptions \
-  -F client_id=DEINE_CLIENT_ID \
-  -F client_secret=STRAVA_CLIENT_SECRET \
-  -F callback_url=https://DEIN-PROJECT.supabase.co/functions/v1/strava-webhook \
-  -F verify_token=VERIFY_TOKEN
-```
+Konsequenzen:
 
-SQL für die Deduplizierungstabelle: `supabase/strava-webhook-events.sql`
+- Kein produktiver Webhook-Endpoint
+- Kein Secret `STRAVA_VERIFY_TOKEN` in Supabase gesetzt
+- Tabelle `strava_webhook_events` bleibt leer
+- Sync erfolgt ausschliesslich über den Admin-Button (Function `sync-strava-activities`)
+
+Diese Abgrenzung ist in Abschnitt 1.3 dokumentiert und entspricht der pragmatischen Entscheidung aus Zeitgründen.
+
+#### Secrets (Edge Functions)
+
+
+| Secret                      | Verwendung                        | Gesetzt                        |
+| --------------------------- | --------------------------------- | ------------------------------ |
+| `SUPABASE_URL`              | Automatisch durch Supabase        | Ja                             |
+| `SUPABASE_SERVICE_ROLE_KEY` | Automatisch durch Supabase        | Ja                             |
+| `STRAVA_CLIENT_ID`          | Token-Refresh und API-Aufrufe     | Ja (Dashboard)                 |
+| `STRAVA_CLIENT_SECRET`      | Token-Refresh und API-Aufrufe     | Ja (Dashboard)                 |
+| `STRAVA_VERIFY_TOKEN`       | Webhook-Subscription-Verifikation | **Nein** (Webhook nicht aktiv) |
+
+
+*Tabelle 4.5 – Edge-Function-Secrets*
 
 ### 4.5 Frontend
 
-#### Öffentliche Seiten
+Das Frontend ist eine **React-SPA** mit Vite. Routing, Layout und Auth-State sind zentral in `App.jsx`, `Layout.jsx` und `AuthContext.jsx` organisiert.
 
-* Home
-* About
-* Raceplan
-* Activities
+#### Seitenübersicht
 
-#### Geschützte Seiten
 
-* Trainingsdetails
-* Profilverwaltung
+| Route               | Komponente                | Zugriff               | Umsetzung                                                               |
+| ------------------- | ------------------------- | --------------------- | ----------------------------------------------------------------------- |
+| `/`                 | `Home.jsx`                | Gast                  | Portfolio-Karten, Hero-Bild aus Storage                                 |
+| `/about`            | `About.jsx`               | Gast                  | Steckbrief aus `config/athlete.js`, Bilder aus Storage                  |
+| `/raceplan`         | `Raceplan.jsx`            | Gast (CRUD nur Admin) | Liste mit Accordion; Formular für Create/Update/Delete                  |
+| `/activities`       | `Activities.jsx`          | Gast                  | View `strava_activities_overview`, Sportart-Filter, Sync-Button (Admin) |
+| `/activities/:id`   | `ActivityDetails.jsx`     | User                  | Volle `strava_activities`-Zeile, Statistik-Gruppen, Leaflet-Karte       |
+| `/profile`          | `Profile.jsx`             | User                  | Username bearbeiten, Konto löschen                                      |
+| `/login`, `/signup` | `Login.jsx`, `Signup.jsx` | Gast                  | Supabase Auth                                                           |
 
-#### Administrationsbereich
 
-* Raceplan verwaltung
+*Tabelle 4.6 – Frontend-Seiten*
 
-### 4.6 Deployment
+#### Wichtige Implementierungsdetails
 
-**Frontend:** Das React-Projekt (`webpage-jabra/`) wird mit Vite gebaut und als statische Seite gehostet (z. B. Vercel, Netlify oder Supabase Hosting).
+**Trainingsübersicht (`Activities.jsx`):** Gäste lesen über die View `strava_activities_overview`; Klicks auf Karten führen ohne Login nicht zur Detailseite. Eingeloggte User navigieren zu `/activities/:id`. Der Admin-Button «Strava synchronisieren» ruft `POST …/functions/v1/sync-strava-activities` auf und lädt die Liste danach neu.
 
-**Backend (Supabase):**
+**Trainingsdetails (`ActivityDetails.jsx`):** Leistungswerte werden über Hilfsfunktionen in `utils/activityDetails.js` gruppiert (Übersicht, Höhe, Geschwindigkeit, Herzfrequenz, Leistung). Die Route wird über `summary_polyline` mit Leaflet und `@mapbox/polyline` dargestellt.
 
-* SQL-Skripte (`supabase/*.sql`) im Supabase SQL Editor ausführen (Tabellen, RLS, Views, Trigger)
-* Edge Functions deployen:
+*Hinweis: Der Code für die Leaflet- und Polyline-Darstellung wurde mit Cursor generiert (vgl. Abschnitt 3.2).*
+
+**Raceplan (`Raceplan.jsx`):** CRUD-Operationen nutzen `buildRacePayload` und `raceToForm` aus `utils/raceplan.js`. Mutationen verwenden `.select()`, damit fehlgeschlagene RLS-Updates im Frontend erkannt werden (Fix nach Code-Review, 23.06.).
+
+**Statische Sportler-Daten:** Name, Ziel und Steckbrief liegen in `config/athlete.js` und werden auf Home und About eingebunden — bewusst ohne CMS (vgl. Abschnitt 3.3).
+
+#### Frontend-Struktur (Auszug)
+
+
+| Bereich | Dateien                                                              | Aufgabe                                  |
+| ------- | -------------------------------------------------------------------- | ---------------------------------------- |
+| Routing | `App.jsx`, `ProtectedRoute.jsx`                                      | Öffentliche und geschützte Routen        |
+| Auth    | `AuthContext.jsx`, `Login.jsx`, `Signup.jsx`                         | Session, Registrierung                   |
+| Daten   | `supabase-client.js`                                                 | Zentraler Supabase-Client                |
+| Utils   | `utils/activities.js`, `raceplan.js`, `activityDetails.js`, `map.js` | Filter, Formatierung, Payloads, Polyline |
+| Styles  | `src/css/*.css`                                                      | Responsives Layout pro Seite             |
+
+
+*Tabelle 4.7 – Frontend-Module*
+
+### 4.6 Deployment und CI
+
+#### Supabase Backend (Dashboard)
+
+Sämtliche Backend-Komponenten wurden über das **Supabase Dashboard** bereitgestellt — **ohne Supabase CLI**:
+
+
+| Komponente      | Vorgehen                                                                                    |
+| --------------- | ------------------------------------------------------------------------------------------- |
+| Datenbankschema | SQL-Skripte aus `supabase/*.sql` im **SQL Editor** ausführen                                |
+| Edge Functions  | Code aus `supabase/functions/*.md` im Dashboard unter *Edge Functions* anlegen und deployen |
+| Secrets         | Unter *Edge Functions → Secrets*: `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET`                |
+| Storage         | Bucket `images` mit öffentlichem Lesezugriff                                                |
+| Auth            | E-Mail/Passwort in den Auth-Einstellungen aktiviert                                         |
+
+
+*Tabelle 4.8 – Supabase-Deployment*
+
+Produktiv benötigte Edge Functions:
+
+- `sync-strava-activities` — laufender manueller Sync
+- `strava_initial_sync` — einmaliger Erstimport (optional danach deaktiviert)
+- `strava_sync` — optional, nur Token-Refresh (nicht für den UI-Sync erforderlich)
+
+#### Frontend
+
+Das React-Projekt wird lokal mit Vite gebaut:
 
 ```bash
-supabase functions deploy strava-webhook
-supabase functions deploy strava-sync
+cd webpage-jabra
+npm run build
 ```
 
-* Secrets in Supabase setzen: `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET`, `STRAVA_VERIFY_TOKEN`
-* Strava-Webhook-Subscription mit der `callback_url` auf `strava-webhook` registrieren (vgl. Abschnitt 4.4)
+Der Output in `webpage-jabra/dist/` kann auf einem statischen Host (z. B. Vercel, Netlify oder Supabase Hosting) bereitgestellt werden. Die Umgebungsvariablen (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_API_URL`) werden beim Hosting als Build-Time-Variablen gesetzt.
+
+#### GitHub Actions (CI)
+
+Für kontinuierliche Qualitätssicherung wurde ein **GitHub Actions Workflow** eingerichtet (AP6, 24.06.): Bei Push und Pull Request auf `main` werden im Ordner `webpage-jabra/` Abhängigkeiten installiert (`npm ci`), der Production-Build erstellt und die Vitest-Tests einmalig ausgeführt (`npm run test:run`). Node.js 22.x wird als Laufzeit verwendet.
+
+Der Workflow adressiert das Bewertungskriterium «funktionale Git Actions» (vgl. Abschnitt 7.3). Details zum Workflow-YAML liegen in `github_action.md` bzw. `.github/workflows/`.
+
+#### Deployment-Übersicht
+
+```text
+  Entwickler                    GitHub                         Supabase Cloud
+      │                            │                                  │
+      │  git push / PR             │                                  │
+      │  ─────────────────────────►│  GitHub Actions: build + test    │
+      │                            │                                  │
+      │  SQL + Edge Functions      │                                  │
+      │  ────────────────────────────────────────────────────────────►│
+      │                            │       PostgreSQL, Auth, RLS,     │
+      │                            │       Storage, Edge Functions    │
+      │                            │                                  │
+      │  npm run build             │                                  │
+      │  ──► statisches Hosting ─────────────────────────────────────►│  (optional)
+      │    (Vercel / Netlify)      │                                  │
+```
 
 ---
 
@@ -1174,99 +1299,118 @@ Im Rahmen von **AP7 (Testdurchführung, Fehlerbehebung und Abnahmetests)** wurde
 
 ### 5.1 Teststrategie
 
-| Aspekt | Vorgehen |
-| ------ | -------- |
-| Testart | Manuelle Abnahmetests (Black-Box) + automatisierte Unit-Tests (Vitest) |
-| Testbasis | User Stories, Anforderungen F1–F18, NF1–NF8 |
-| Rollen | Gast (nicht eingeloggt), User (registriert), Sportler/Admin |
-| Priorität | Sicherheit (RLS, Auth) und rollenbasierte Zugriffe zuerst, danach CRUD und Darstellung |
-| Automatisierung | Reine Hilfsfunktionen und Auth-Guard; Supabase/Strava nur manuell |
-| Fehlerbehandlung | Gefundene Abweichungen dokumentieren, beheben und Test wiederholen |
+
+| Aspekt           | Vorgehen                                                                               |
+| ---------------- | -------------------------------------------------------------------------------------- |
+| Testart          | Manuelle Abnahmetests (Black-Box) + automatisierte Unit-Tests (Vitest)                 |
+| Testbasis        | User Stories, Anforderungen F1–F18, NF1–NF8                                            |
+| Rollen           | Gast (nicht eingeloggt), User (registriert), Sportler/Admin                            |
+| Priorität        | Sicherheit (RLS, Auth) und rollenbasierte Zugriffe zuerst, danach CRUD und Darstellung |
+| Automatisierung  | Reine Hilfsfunktionen und Auth-Guard; Supabase/Strava nur manuell                      |
+| Fehlerbehandlung | Gefundene Abweichungen dokumentieren, beheben und Test wiederholen                     |
+
 
 ### 5.2 Testumgebung
 
-| Komponente | Version / Angabe |
-| ---------- | ---------------- |
-| Browser | Chrome / Safari (aktuell) / Brave |
-| Frontend | React (Vite), lokal |
-| Backend | Supabase (PostgreSQL, Auth, RLS) |
-| Testdaten | Mind. 1 Gast-Session, 1 User-Account, 1 Admin-Account; Strava-Aktivitäten in DB |
-| Testdatum | 21.06.2026 |
+
+| Komponente | Version / Angabe                                                                |
+| ---------- | ------------------------------------------------------------------------------- |
+| Browser    | Chrome / Safari (aktuell) / Brave                                               |
+| Frontend   | React (Vite), lokal                                                             |
+| Backend    | Supabase (PostgreSQL, Auth, RLS)                                                |
+| Testdaten  | Mind. 1 Gast-Session, 1 User-Account, 1 Admin-Account; Strava-Aktivitäten in DB |
+| Testdatum  | 21.06.2026                                                                      |
+
 
 ### 5.3 Abnahmetests – User Stories
 
 *Tabelle 5.1 – Abnahmetests pro User Story*
 
-| ID | Bezug | Rolle | Testschritt | Erwartetes Ergebnis | Ergebnis |
-| -- | ----- | ----- | ----------- | ------------------- | -------- |
-| T-01 | US1 / F1 | Gast | `/` aufrufen ohne Login | Startseite lädt; Vorname, Nachname und Ziel des Sportlers sind sichtbar | - |
-| T-02 | US1 / F1 | Gast | Navigation auf der Startseite prüfen | Links zu Home, About, Raceplan, Activities, Login und Signup sind sichtbar | - |
-| T-03 | US2 / F2 | Gast | Über Navigation «About» aufrufen | About-Seite lädt ohne Login; Steckbrief und Bild werden angezeigt | - |
-| T-04 | US3 / F3 | Gast | `/raceplan` aufrufen | Alle Wettkämpfe werden in einer Liste angezeigt, sortiert nach Datum | - |
-| T-05 | US3 / F3 | Gast | Wettkampf-Karte aufklappen | Details (Datum, Ort, Disziplin, Distanz, Resultat) und Event-Link sind sichtbar | — |
-| T-06 | US3 / F3 | Gast | Event-Link anklicken | Offizielle Veranstaltungsseite öffnet sich in neuem Tab | — |
-| T-07 | US4 / F4 | Gast | `/activities` aufrufen | Trainingsübersicht lädt ohne Login; Trainings werden als Liste angezeigt | — |
-| T-08 | US4 / F5 | Gast | Filter «SWIM», «BIKE», «RUN» nacheinander wählen | Liste zeigt nur passende Sportarten; «ALLE» zeigt wieder alle | — |
-| T-09 | US4 / F16 | Gast | Hinweistext und Trainingskarte prüfen | Hinweis «Melde dich an…» ist sichtbar; Klick auf Training führt **nicht** zu Details | — |
-| T-10 | US5 / F6 | Gast | Über Login → Signup Registrierungsformular öffnen | Formular mit Benutzername, E-Mail und Passwort ist erreichbar | — |
-| T-11 | US5 / F6 | Gast | Registrierung mit gültigen Daten absenden | Erfolgsmeldung; Konto wird angelegt; Profil-Eintrag in `profiles` vorhanden | — |
-| T-12 | US5 / NF7 | Gast | Registrierung mit zu kurzem Benutzernamen (< 3 Zeichen) | Browser-Validierung verhindert Absenden | — |
-| T-13 | US6 / F8, F15 | User | Einloggen und auf ein Training klicken | Detailseite `/activities/:id` öffnet sich | — |
-| T-14 | US6 / F8 | User | Detailseite prüfen | Distanz, Zeit, Geschwindigkeit, Höhe, HF, Watt (falls vorhanden) und Karte werden angezeigt | — |
-| T-15 | US6 / F8 | User | «Zurück zur Übersicht» nutzen | Rückkehr zur Trainingsübersicht funktioniert | — |
-| T-16 | US7 / F9 | User | Als eingeloggter User `/profile` aufrufen | Profilseite mit E-Mail und Benutzername ist sichtbar | — |
-| T-17 | US7 / F9, F18 | User | Benutzername ändern und speichern | Erfolgsmeldung; neuer Name auf Profilseite und in der Navigation sichtbar | — |
-| T-18 | US8 / F10 | User | «Konto dauerhaft löschen» wählen und Bestätigung abbrechen | Konto bleibt bestehen; User bleibt eingeloggt | — |
-| T-19 | US8 / F10 | User | Löschen bestätigen (Test-Account verwenden) | Konto wird entfernt; automatische Abmeldung; Redirect zur Startseite | — |
-| T-20 | US9 / F11 | Sportler | Als Admin `/raceplan` aufrufen | Button «Race hinzufügen» ist sichtbar | — |
-| T-21 | US9 / F11, NF7 | Sportler | Neues Rennen mit allen Pflichtfeldern anlegen | Eintrag erscheint sofort in der Raceplan-Liste | — |
-| T-22 | US9 / NF7 | Sportler | Formular ohne Pflichtfeld absenden | Browser-Validierung verhindert Speichern | — |
-| T-23 | US10 / F12, F18 | Sportler | Bestehenden Eintrag bearbeiten (z. B. Resultat eintragen) | Änderungen werden gespeichert und korrekt angezeigt | — |
-| T-24 | US11 / F13 | Sportler | Eintrag löschen und Bestätigung abbrechen | Eintrag bleibt im Raceplan | — |
-| T-25 | US11 / F13, F18 | Sportler | Löschen bestätigen | Eintrag verschwindet aus der Liste | — |
+
+| ID   | Bezug           | Rolle    | Testschritt                                                | Erwartetung                                                                         | Ergebnis |
+| ---- | --------------- | -------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------- | -------- |
+| T-01 | US1 / F1        | Gast     | `/` aufrufen ohne Login                                    | Startseite lädt; Vorname, Nachname und Ziel des Sportlers sind sichtbar                     | OK       |
+| T-02 | US1 / F1        | Gast     | Navigation auf der Startseite prüfen                       | Links zu Home, About, Raceplan, Activities, Login und Signup sind sichtbar                  | OK       |
+| T-03 | US2 / F2        | Gast     | Über Navigation «About» aufrufen                           | About-Seite lädt ohne Login; Steckbrief und Bild werden angezeigt                           | OK       |
+| T-04 | US3 / F3        | Gast     | `/raceplan` aufrufen                                       | Alle Wettkämpfe werden in einer Liste angezeigt, sortiert nach Datum                        | OK       |
+| T-05 | US3 / F3        | Gast     | Wettkampf-Karte aufklappen                                 | Details (Datum, Ort, Disziplin, Distanz, Resultat) und Event-Link sind sichtbar             | OK       |
+| T-06 | US3 / F3        | Gast     | Event-Link anklicken                                       | Offizielle Veranstaltungsseite öffnet sich in neuem Tab                                     | OK       |
+| T-07 | US4 / F4        | Gast     | `/activities` aufrufen                                     | Trainingsübersicht lädt ohne Login; Trainings werden als Liste angezeigt                    | OK       |
+| T-08 | US4 / F5        | Gast     | Filter «SWIM», «BIKE», «RUN» nacheinander wählen           | Liste zeigt nur passende Sportarten; «ALLE» zeigt wieder alle                               | OK       |
+| T-09 | US4 / F16       | Gast     | Hinweistext und Trainingskarte prüfen                      | Hinweis «Melde dich an…» ist sichtbar; Klick auf Training führt **nicht** zu Details        | OK       |
+| T-10 | US5 / F6        | Gast     | Über Login → Signup Registrierungsformular öffnen          | Formular mit Benutzername, E-Mail und Passwort ist erreichbar                               | OK       |
+| T-11 | US5 / F6        | Gast     | Registrierung mit gültigen Daten absenden                  | Erfolgsmeldung; Konto wird angelegt; Profil-Eintrag in `profiles` vorhanden                 | OK       |
+| T-12 | US5 / NF7       | Gast     | Registrierung mit zu kurzem Benutzernamen (< 3 Zeichen)    | Browser-Validierung verhindert Absenden                                                     | OK       |
+| T-13 | US6 / F8, F15   | User     | Einloggen und auf ein Training klicken                     | Detailseite `/activities/:id` öffnet sich                                                   | OK       |
+| T-14 | US6 / F8        | User     | Detailseite prüfen                                         | Distanz, Zeit, Geschwindigkeit, Höhe, HF, Watt (falls vorhanden) und Karte werden angezeigt | OK       |
+| T-15 | US6 / F8        | User     | «Zurück zur Übersicht» nutzen                              | Rückkehr zur Trainingsübersicht funktioniert                                                | OK       |
+| T-16 | US7 / F9        | User     | Als eingeloggter User Benutzerprofil aufrufen              | Profilseite mit E-Mail und Benutzername ist sichtbar                                        | OK       |
+| T-17 | US7 / F9, F18   | User     | Benutzername ändern und speichern                          | Erfolgsmeldung; neuer Name auf Profilseite und in der Navigation sichtbar                   | OK       |
+| T-18 | US8 / F10       | User     | «Konto dauerhaft löschen» wählen und Bestätigung abbrechen | Konto bleibt bestehen; User bleibt eingeloggt                                               | OK       |
+| T-19 | US8 / F10       | User     | Löschen bestätigen (Test-Account verwenden)                | Konto wird entfernt; automatische Abmeldung; Redirect zur Startseite                        | OK       |
+| T-20 | US9 / F11       | Sportler | Als Admin `/raceplan` aufrufen                             | Button «Race hinzufügen» ist sichtbar                                                       | OK       |
+| T-21 | US9 / F11, NF7  | Sportler | Neues Rennen mit allen Pflichtfeldern anlegen              | Eintrag erscheint sofort in der Raceplan-Liste                                              | OK       |
+| T-22 | US9 / NF7       | Sportler | Formular ohne Pflichtfeld absenden                         | Browser-Validierung verhindert Speichern                                                    | OK       |
+| T-23 | US10 / F12, F18 | Sportler | Bestehenden Eintrag bearbeiten (z. B. Resultat eintragen)  | Änderungen werden gespeichert und korrekt angezeigt                                         | OK       |
+| T-24 | US11 / F13      | Sportler | Eintrag löschen und Bestätigung abbrechen                  | Eintrag bleibt im Raceplan                                                                  | OK       |
+| T-25 | US11 / F13, F18 | Sportler | Löschen bestätigen                                         | Eintrag verschwindet aus der Liste                                                          | OK       |
+
+
+**Feedback - nicht geändert**
+
+- T-04: "sortiert nach Datum" ist nicht auf den ersten Bilck erkennbar, da immer nur ein Race ausgeklappt ist.
+- T-09: Hinweistext ist nicht auf den ersten Blick sichtbar
+- T-17: Passwort kann nicht geändert werden, es enthält auch keine "Passwort vergessen" Option.
+- T-23: Formular erscheint immer zu oberst. Besser wäre immer direkt unterhalb des zu bearbeitenden Races-
 
 ### 5.4 Authentifizierung und Rollen
 
 *Tabelle 5.2 – Tests für Login, Logout und rollenbasierte Oberfläche*
 
-| ID | Bezug | Rolle | Testschritt | Erwartetes Ergebnis | Ergebnis |
-| -- | ----- | ----- | ----------- | ------------------- | -------- |
-| T-26 | F7 | Gast | Gültige Login-Daten eingeben | Weiterleitung zur Startseite oder zur zuvor aufgerufenen geschützten Seite | — |
-| T-27 | F7 / NF7 | Gast | Login mit falschem Passwort | Fehlermeldung; kein Zugang zu geschützten Seiten | — |
-| T-28 | F7 | User | «Logout» in der Navigation klicken | Session beendet; Login/Signup-Links wieder sichtbar; Benutzername verschwindet | — |
-| T-29 | F14 | User | Navigation als normaler User prüfen | Kein «Race hinzufügen»; Benutzername in der Navigation sichtbar | — |
-| T-30 | F14 | Sportler | Navigation als Admin prüfen | Zusätzlich Raceplan-CRUD verfügbar | — |
-| T-31 | F15 | Gast | `/activities/1` direkt in der Adresszeile aufrufen | Redirect zu `/login` | — |
-| T-32 | F15 | Gast | `/profile` direkt aufrufen | Redirect zu `/login` | — |
+
+| ID   | Bezug    | Rolle    | Testschritt                                        | Erwartetes Ergebnis                                                            | Ergebnis |
+| ---- | -------- | -------- | -------------------------------------------------- | ------------------------------------------------------------------------------ | -------- |
+| T-26 | F7       | Gast     | Gültige Login-Daten eingeben                       | Weiterleitung zur Startseite oder zur zuvor aufgerufenen geschützten Seite     | OK       |
+| T-27 | F7 / NF7 | Gast     | Login mit falschem Passwort                        | Fehlermeldung; kein Zugang zu geschützten Seiten                               | OK       |
+| T-28 | F7       | User     | «Logout» in der Navigation klicken                 | Session beendet; Login/Signup-Links wieder sichtbar; Benutzername verschwindet | OK       |
+| T-29 | F14      | User     | Navigation als normaler User prüfen                | Kein «Race hinzufügen»; Benutzername in der Navigation sichtbar                | OK       |
+| T-30 | F14      | Sportler | Navigation als Admin prüfen                        | Zusätzlich Raceplan-CRUD verfügbar                                             | OK       |
+| T-31 | F15      | Gast     | `/activities/1` direkt in der Adresszeile aufrufen | Redirect zu `/login`                                                           | OK       |
+| T-32 | F15      | Gast     | `/profile` direkt aufrufen                         | Redirect zu `/login`                                                           | OK       |
+
 
 ### 5.5 Sicherheits- und RLS-Tests
 
 *Tabelle 5.3 – Tests für Row Level Security und Berechtigungen (NF3, NF4)*
 
-| ID | Bezug | Rolle | Testschritt | Erwartetes Ergebnis | Ergebnis |
-| -- | ----- | ----- | ----------- | ------------------- | -------- |
-| T-33 | F16 / NF4 | Gast | Trainingsübersicht (`strava_activities_overview`) laden | SELECT erlaubt; Übersichtsdaten sichtbar | — |
-| T-34 | F16 / NF4 | Gast | Vollständige Aktivitätsdetails abrufen (direkte URL) | Kein Zugriff; Redirect zu Login | — |
-| T-35 | NF4 | User | Aktivitätsdetails als eingeloggter User laden | SELECT auf `strava_activities` erlaubt | — |
-| T-36 | NF4 | User | Raceplan-Eintrag erstellen versuchen | Kein «Race hinzufügen»-Button; INSERT über UI nicht möglich | — |
-| T-37 | NF4 | User | Raceplan-Update/-Delete über UI versuchen | Bearbeiten/Löschen-Buttons nicht sichtbar | — |
-| T-38 | NF4 | Sportler | Race CRUD ausführen | INSERT, UPDATE, DELETE nur mit `role = admin` erfolgreich | — |
-| T-39 | NF4 | User | Fremdes Profil per UI bearbeiten | Nur eigenes Profil unter `/profile` editierbar | — |
-| T-40 | F10 / NF4 | User | Eigenes Konto löschen | RPC `delete_own_account` entfernt Profil und Auth-User | — |
+
+| ID   | Bezug     | Rolle    | Testschritt                                             | Erwartetes Ergebnis                                         | Ergebnis                    |
+| ---- | --------- | -------- | ------------------------------------------------------- | ----------------------------------------------------------- | --------------------------- |
+| T-33 | F16 / NF4 | Gast     | Trainingsübersicht (`strava_activities_overview`) laden | SELECT erlaubt; Übersichtsdaten sichtbar                    | OK                          |
+| T-34 | F16 / NF4 | Gast     | Vollständige Aktivitätsdetails abrufen (direkte URL)    | Kein Zugriff; Redirect zu Login                             | NOK - Redirect schlägt fehl |
+| T-35 | NF4       | User     | Aktivitätsdetails als eingeloggter User laden           | SELECT auf `strava_activities` erlaubt                      | OK                          |
+| T-36 | NF4       | User     | Raceplan-Eintrag erstellen versuchen                    | Kein «Race hinzufügen»-Button; INSERT über UI nicht möglich | OK                          |
+| T-37 | NF4       | User     | Raceplan-Update/-Delete über UI versuchen               | Bearbeiten/Löschen-Buttons nicht sichtbar                   | OK                          |
+| T-38 | NF4       | Sportler | Race CRUD ausführen                                     | INSERT, UPDATE, DELETE nur mit `role = admin` erfolgreich   | OK                          |
+| T-39 | NF4       | User     | Fremdes Profil per UI bearbeiten                        | Nur eigenes Profil unter `/profile` editierbar              | OK                          |
+| T-40 | F10 / NF4 | User     | Eigenes Konto löschen                                   | RPC `delete_own_account` entfernt Profil und Auth-User      | OK                          |
+
 
 ### 5.6 Nicht-funktionale Tests
 
 *Tabelle 5.4 – Nicht-funktionale Anforderungen*
 
-| ID | Bezug | Testschritt | Erwartetes Ergebnis | Ergebnis |
-| -- | ----- | ----------- | ------------------- | -------- |
-| T-41 | NF1 | App in Chrome und Safari öffnen | Alle Seiten laden und sind bedienbar | — |
-| T-42 | NF2 | Desktop- und Mobile-Ansicht (DevTools / Handy) prüfen | Layout passt sich an; Navigation und Inhalte bleiben lesbar | — |
-| T-43 | NF6 | Alle Hauptseiten durchklicken | Einheitliches Layout, klare Navigation, verständliche Beschriftungen | — |
-| T-44 | NF7 | Ungültige Formulareingaben testen (Login, Signup, Raceplan) | Validierung/Fehlermeldungen werden angezeigt | — |
-| T-45 | NF8 | Raceplan-Eintrag speichern, Seite neu laden | Daten bleiben in der Datenbank erhalten | — |
-| T-46 | NF8 | Benutzername speichern, aus- und wieder einloggen | Geänderter Benutzername bleibt erhalten | — |
-| T-47 | NF5 | Profildaten in Supabase Dashboard prüfen | Daten liegen in PostgreSQL (`profiles`, `auth.users`) | — |
+
+| ID   | Bezug | Testschritt                                                 | Erwartetes Ergebnis                                                  | Ergebnis |
+| ---- | ----- | ----------------------------------------------------------- | -------------------------------------------------------------------- | -------- |
+| T-41 | NF1   | App in Chrome und Safari öffnen                             | Alle Seiten laden und sind bedienbar                                 | OK       |
+| T-42 | NF2   | Desktop- und Mobile-Ansicht (DevTools / Handy) prüfen       | Layout passt sich an; Navigation und Inhalte bleiben lesbar          | —        |
+| T-43 | NF6   | Alle Hauptseiten durchklicken                               | Einheitliches Layout, klare Navigation, verständliche Beschriftungen | OK       |
+| T-44 | NF7   | Ungültige Formulareingaben testen (Login, Signup, Raceplan) | Validierung/Fehlermeldungen werden angezeigt                         | OK       |
+| T-45 | NF8   | Raceplan-Eintrag speichern, Seite neu laden                 | Daten bleiben in der Datenbank erhalten                              | OK       |
+| T-46 | NF8   | Benutzername speichern, aus- und wieder einloggen           | Geänderter Benutzername bleibt erhalten                              | OK       |
+| T-47 | NF5   | Profildaten in Supabase Dashboard prüfen                    | Daten liegen in PostgreSQL (`profiles`, `auth.users`)                | OK       |
+
 
 ### 5.7 Automatisierte Unit-Tests (Vitest)
 
@@ -1274,13 +1418,15 @@ Zusätzlich zu den manuellen Abnahmetests wurden **34 automatisierte Unit-Tests*
 
 #### 5.7.1 Test-Setup
 
-| Komponente | Angabe |
-| ---------- | ------ |
-| Framework | Vitest 4.x |
-| Test-Runner | integriert in Vite (`vite.config.js`) |
-| DOM-Umgebung | jsdom |
-| Component-Tests | `@testing-library/react`, `@testing-library/jest-dom` |
-| Ausführung | `npm run test:run` (einmalig) bzw. `npm test` (Watch-Modus) |
+
+| Komponente      | Angabe                                                      |
+| --------------- | ----------------------------------------------------------- |
+| Framework       | Vitest 4.x                                                  |
+| Test-Runner     | integriert in Vite (`vite.config.js`)                       |
+| DOM-Umgebung    | jsdom                                                       |
+| Component-Tests | `@testing-library/react`, `@testing-library/jest-dom`       |
+| Ausführung      | `npm run test:run` (einmalig) bzw. `npm test` (Watch-Modus) |
+
 
 Die testbare Logik wurde in Utils-Module ausgelagert (`src/utils/`). Die zugehörigen Tests liegen zentral unter `tests/` (Unterordner `utils/` und `components/`), das globale Setup in `tests/setup.js`.
 
@@ -1288,45 +1434,47 @@ Die testbare Logik wurde in Utils-Module ausgelagert (`src/utils/`). Die zugehö
 
 *Tabelle 5.5 – Automatisierte Unit-Tests*
 
-| ID | Testdatei | Getestete Funktion / Komponente | Bezug | Anzahl Tests | Ergebnis |
-| -- | --------- | ------------------------------- | ----- | ------------ | -------- |
-| AT-01 | `tests/utils/activities.test.js` | `formatDuration` | US6 / F8 | 2 | OK |
-| AT-02 | `tests/utils/activities.test.js` | `formatDistance` | US4 / F8 | 3 | OK |
-| AT-03 | `tests/utils/activities.test.js` | `matchesFilter` | US4 / F5 | 4 | OK |
-| AT-04 | `tests/utils/activities.test.js` | `formatActivityDetails` | US4 / F4 | 2 | OK |
-| AT-05 | `tests/utils/raceplan.test.js` | `formatDateForInput` | US9–11 | 2 | OK |
-| AT-06 | `tests/utils/raceplan.test.js` | `raceToForm` | US10 | 1 | OK |
-| AT-07 | `tests/utils/raceplan.test.js` | `buildRacePayload` | US9–11 / NF7 | 2 | OK |
-| AT-08 | `tests/utils/activityDetails.test.js` | `getStatValue` | US6 / F8 | 3 | OK |
-| AT-09 | `tests/utils/activityDetails.test.js` | `formatKilojoulesAsKcal` | US6 / F8 | 2 | OK |
-| AT-10 | `tests/utils/activityDetails.test.js` | `getStatGroups` | US6 / F8 | 6 | OK |
-| AT-11 | `tests/utils/activityDetails.test.js` | `getSportIcon` | US6 | 2 | OK |
-| AT-12 | `tests/utils/map.test.js` | `decodePolyline` | US6 / Strava-Integration | 2 | OK |
-| AT-13 | `tests/components/ProtectedRoute.test.jsx` | Redirect bei fehlender Auth | F15 | 1 | OK |
-| AT-14 | `tests/components/ProtectedRoute.test.jsx` | Zugriff für eingeloggte User | F15 | 1 | OK |
-| AT-15 | `tests/components/ProtectedRoute.test.jsx` | Kein Render während Auth-Loading | F15 | 1 | OK |
 
-**Gesamt: 5 Testdateien, 34 Tests — alle bestanden.**
+| ID    | Testdatei                                  | Getestete Funktion / Komponente  | Bezug                    | Anzahl Tests | Ergebnis |
+| ----- | ------------------------------------------ | -------------------------------- | ------------------------ | ------------ | -------- |
+| AT-01 | `tests/utils/activities.test.js`           | `formatDuration`                 | US6 / F8                 | 2            | OK       |
+| AT-02 | `tests/utils/activities.test.js`           | `formatDistance`                 | US4 / F8                 | 3            | OK       |
+| AT-03 | `tests/utils/activities.test.js`           | `matchesFilter`                  | US4 / F5                 | 4            | OK       |
+| AT-04 | `tests/utils/activities.test.js`           | `formatActivityDetails`          | US4 / F4                 | 2            | OK       |
+| AT-05 | `tests/utils/raceplan.test.js`             | `formatDateForInput`             | US9–11                   | 2            | OK       |
+| AT-06 | `tests/utils/raceplan.test.js`             | `raceToForm`                     | US10                     | 1            | OK       |
+| AT-07 | `tests/utils/raceplan.test.js`             | `buildRacePayload`               | US9–11 / NF7             | 2            | OK       |
+| AT-08 | `tests/utils/activityDetails.test.js`      | `getStatValue`                   | US6 / F8                 | 3            | OK       |
+| AT-09 | `tests/utils/activityDetails.test.js`      | `formatKilojoulesAsKcal`         | US6 / F8                 | 2            | OK       |
+| AT-10 | `tests/utils/activityDetails.test.js`      | `getStatGroups`                  | US6 / F8                 | 6            | OK       |
+| AT-11 | `tests/utils/activityDetails.test.js`      | `getSportIcon`                   | US6                      | 2            | OK       |
+| AT-12 | `tests/utils/map.test.js`                  | `decodePolyline`                 | US6 / Strava-Integration | 2            | OK       |
+| AT-13 | `tests/components/ProtectedRoute.test.jsx` | Redirect bei fehlender Auth      | F15                      | 1            | OK       |
+| AT-14 | `tests/components/ProtectedRoute.test.jsx` | Zugriff für eingeloggte User     | F15                      | 1            | OK       |
+| AT-15 | `tests/components/ProtectedRoute.test.jsx` | Kein Render während Auth-Loading | F15                      | 1            | OK       |
+
+
+**Gesamt: 6 Testdateien, Tests — alle bestanden.**
 
 #### 5.7.3 Abdeckung und Grenzen
 
 **Automatisiert getestet:**
 
-* Sportart-Filter (SWIM / BIKE / RUN)
-* Formatierung von Distanz, Dauer und Aktivitätsdetails
-* Gruppierte Statistik-Anzeige (Übersicht, Höhe, Geschwindigkeit, HF, Leistung)
-* Umrechnung von `kilojoules` in kcal (`÷ 4.184`)
-* Raceplan-Payload (Trimmen, Ländercode, leeres Resultat → `null`)
-* Bedingte Anzeige von Statistikfeldern (HF, Watt, Höhe)
-* Polyline-Decoding für die Kartenansicht
-* Weiterleitung zu `/login` bei geschützten Routen
+- Sportart-Filter (SWIM / BIKE / RUN)
+- Formatierung von Distanz, Dauer und Aktivitätsdetails
+- Gruppierte Statistik-Anzeige (Übersicht, Höhe, Geschwindigkeit, HF, Leistung)
+- Umrechnung von `kilojoules` in kcal (`÷ 4.184`)
+- Raceplan-Payload (Trimmen, Ländercode, leeres Resultat → `null`)
+- Bedingte Anzeige von Statistikfeldern (HF, Watt, Höhe)
+- Polyline-Decoding für die Kartenansicht
+- Weiterleitung zu `/login` bei geschützten Routen
 
 **Bewusst nicht automatisiert** (nur manuelle Tests, vgl. Tabellen 5.1–5.4):
 
-* Supabase Auth, RLS-Policies und RPC `delete_own_account`
-* Strava-Webhook und Edge Functions
-* Vollständige UI-Flows (Signup, Raceplan-CRUD, Responsives Layout)
-* E2E-Tests über Browser-Automation
+- Supabase Auth, RLS-Policies und RPC `delete_own_account`
+- Strava-Webhook und Edge Functions
+- Vollständige UI-Flows (Signup, Raceplan-CRUD, Responsives Layout)
+- E2E-Tests über Browser-Automation
 
 #### 5.7.4 Beispielausführung
 
@@ -1339,14 +1487,16 @@ Erwartete Ausgabe: `Test Files 5 passed (5)`, `Tests 34 passed (34)`.
 
 ### 5.8 Testzusammenfassung
 
-| Kennzahl | Wert |
-| -------- | ---- |
-| Manuelle Testfälle (T-01–T-47) | 47 |
-| Automatisierte Unit-Tests (AT-01–AT-15) | 34 |
-| Manuelle Tests bestanden (OK) | — |
-| Manuelle Tests fehlgeschlagen (NOK) | — |
-| Automatisierte Tests bestanden | 34 / 34 |
-| Behobene Fehler während AP7 | RLS-Policy für Aktivitätsübersicht; Admin-Berechtigung beim Raceplan-CRUD; Polyline-Mapping aus Strava-Daten |
+
+| Kennzahl                                | Wert                                                                                                         |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Manuelle Testfälle (T-01–T-47)          | 47                                                                                                           |
+| Automatisierte Unit-Tests (AT-01–AT-15) | 34                                                                                                           |
+| Manuelle Tests bestanden (OK)           | —                                                                                                            |
+| Manuelle Tests fehlgeschlagen (NOK)     | —                                                                                                            |
+| Automatisierte Tests bestanden          | 34 / 34                                                                                                      |
+| Behobene Fehler während AP7             | RLS-Policy für Aktivitätsübersicht; Admin-Berechtigung beim Raceplan-CRUD; Polyline-Mapping aus Strava-Daten |
+
 
 **Hinweis:** Die Spalte «Ergebnis» wird bei der Testdurchführung mit **OK** oder **NOK** ergänzt. Für T-19 (Kontolöschung) und destruktive Tests (T-25) sollten separate Test-Accounts verwendet werden.
 
@@ -1354,15 +1504,412 @@ Erwartete Ausgabe: `Test Files 5 passed (5)`, `Tests 34 passed (34)`.
 
 ## 6. Sicherheitskonzept
 
+Das Sicherheitskonzept beschreibt, wie die Webapplikation vor unbefugtem Zugriff, Datenmissbrauch und Leck sensibler Informationen geschützt wird. Es baut auf den nicht-funktionalen Anforderungen **NF3** (sichere Authentifizierung) und **NF4** (Row Level Security) auf und fasst die Massnahmen aus Umsetzung (Kapitel 4) und Tests (Kapitel 5) in einem zusammenhängenden Schutzkonzept zusammen.
+
+Da die Plattform personenbezogene Benutzerkonten, detaillierte Trainingsdaten und Strava-OAuth-Tokens verarbeitet, wurde Sicherheit nicht als nachträgliche Ergänzung, sondern als **Architekturprinzip** behandelt: Zugriffsrechte werden auf Datenbankebene durchgesetzt; das Frontend ergänzt diese Kontrolle durch Routing und bedingte UI-Elemente.
+
+### 6.1 Sicherheitsziele und Bedrohungsmodell
+
+#### Sicherheitsziele
+
+
+| Ziel                | Bedeutung im Projekt                                                                           | Umsetzung (Kurz)                                                   |
+| ------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **Vertraulichkeit** | Trainingsdetails, Profildaten und Strava-Tokens dürfen nur berechtigten Rollen zugänglich sein | RLS, View mit reduzierten Spalten, Edge Functions mit Service Role |
+| **Integrität**      | Wettkampf- und Profildaten dürfen nur vom Sportler bzw. vom Admin geändert werden              | RLS-Policies mit `is_admin()` bzw. `auth.uid()`                    |
+| **Authentizität**   | Nur registrierte Benutzer mit gültiger Session gelten als identifiziert                        | Supabase Auth (JWT)                                                |
+| **Verfügbarkeit**   | Grundlegende Nutzbarkeit für Gäste und User                                                    | Supabase Cloud, statisches Frontend-Hosting                        |
+
+
+*Tabelle 6.1 – Sicherheitsziele*
+
+#### Bedrohungsmodell
+
+
+| Bedrohung                                | Beispiel                                           | Relevante Schutzmassnahme                                           |
+| ---------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------- |
+| Unbefugter Zugriff auf geschützte Seiten | Gast ruft `/activities/:id` direkt auf             | `ProtectedRoute`, RLS auf `strava_activities`                       |
+| Privilege Escalation                     | Normaler User versucht Raceplan-Einträge zu ändern | RLS auf `races` (nur `is_admin()`), UI blendet Admin-Buttons aus    |
+| Exposition von Secrets                   | Strava Client Secret im Frontend-Code              | Secrets nur in Edge-Function-Umgebung; `.env.local` in `.gitignore` |
+| Direkter Strava-Aufruf aus dem Browser   | Access Token im Client sichtbar                    | Strava-API nur serverseitig (Edge Functions)                        |
+| Manipulation von Profildaten             | User bearbeitet fremdes Profil                     | RLS: UPDATE nur für `auth.uid() = id`                               |
+| Unbefugtes Löschen von Konten            | Löschen fremder Auth-User                          | RPC `delete_own_account` prüft `auth.uid()`                         |
+
+
+*Tabelle 6.2 – Bedrohungsmodell*
+
+Das Modell orientiert sich am **Single-Athlete-Setup**: Es gibt genau einen Admin (Sportler). Mehrmandantenfähigkeit und Schutz vor internen Angreifern mit Service-Role-Zugang sind nicht Ziel des Modulprojekts.
+
+### 6.2 Schutzkonzept (Defense in Depth)
+
+Die Sicherheit wird in **mehreren Schichten** umgesetzt. Scheitert eine Schicht (z. B. ausgeblendeter Button im UI), bleibt der Schutz durch die darunterliegenden Ebenen bestehen — insbesondere durch RLS in PostgreSQL.
+
+```text
+  Schicht 4   Edge Functions (Service Role, Strava-Secrets, serverseitiger Sync)
+       ▲
+  Schicht 3   PostgreSQL + RLS (authoritative Zugriffskontrolle)
+       ▲
+  Schicht 2   Supabase Auth (JWT-Session, gehashte Passwörter)
+       ▲
+  Schicht 1   React-Frontend (ProtectedRoute, bedingte Admin-UI, Client-Validierung)
+       ▲
+  Benutzer / Browser
+```
+
+
+| Schicht          | Komponente                         | Schutzfunktion                             |
+| ---------------- | ---------------------------------- | ------------------------------------------ |
+| 1 – Präsentation | `ProtectedRoute`, bedingte Buttons | UX und erste Barriere; kein Ersatz für RLS |
+| 2 – Identität    | Supabase Auth                      | Registrierung, Login, Session-JWT          |
+| 3 – Daten        | RLS-Policies, SQL-Funktionen       | Erzwingt Lese-/Schreibregeln pro Rolle     |
+| 4 – Integration  | Edge Functions                     | Strava-Tokens und API-Keys nie im Browser  |
+
+
+*Tabelle 6.3 – Defense-in-Depth-Schichten*
+
+**Grundsatz:** Das Frontend darf Berechtigungen anzeigen und navigieren, die **authoritative Entscheidung** trifft jedoch die Datenbank (RLS).
+
+### 6.3 Authentifizierung
+
+Die Authentifizierung erfolgt über **Supabase Auth** mit E-Mail und Passwort. Passwörter werden von Supabase gehasht gespeichert; im Frontend werden keine Klartext-Passwörter persistiert.
+
+#### Ablauf
+
+1. **Registrierung** (`Signup.jsx`): `supabase.auth.signUp()` mit `username` in den User-Metadata; Trigger `handle_new_user` legt Profilzeile an.
+2. **Login** (`Login.jsx`): `signInWithPassword()`; bei Erfolg JWT-Session im Browser.
+3. **Session** (`AuthContext.jsx`): `getSession()` beim Start; `onAuthStateChange` für Login/Logout.
+4. **Logout** (`Layout.jsx`): `signOut()` beendet die Session.
+
+#### Session und JWT
+
+
+| Aspekt              | Umsetzung                                                                                   |
+| ------------------- | ------------------------------------------------------------------------------------------- |
+| Token-Typ           | JWT (Access Token in Session)                                                               |
+| Speicherort         | Browser (Supabase-Client, localStorage-basiert)                                             |
+| Übertragung         | HTTPS zu Supabase; `Authorization: Bearer` bei Edge-Function-Aufrufen                       |
+| Redirect nach Login | `Login.jsx` nutzt `location.state.from` — Rückkehr zur zuvor aufgerufenen geschützten Route |
+
+
+*Tabelle 6.4 – Authentifizierungsmechanismen*
+
+#### Kontolöschung (US8)
+
+Das Löschen eines Kontos erfolgt über die RPC-Funktion `delete_own_account()` (`profiles-delete-account.sql`). Die Function ist als `security definer` definiert, prüft aber zuerst `auth.uid()` und löscht ausschliesslich den eigenen Profil- und Auth-Eintrag. Ausführung ist nur der Rolle `authenticated` gewährt.
+
+### 6.4 Autorisierung und Rollenmodell
+
+Neben der **Authentifizierung** regelt die **Autorisierung**, welche Aktionen erlaubt sind. Das System kennt drei Rollen (vgl. Abschnitt 2.2):
+
+
+| Rolle          | Auth                | Admin-Rechte | Typische Aktionen                                  |
+| -------------- | ------------------- | ------------ | -------------------------------------------------- |
+| Gast           | Keine Session       | Nein         | Öffentliche Seiten, Trainingsübersicht (reduziert) |
+| User           | JWT, `role = user`  | Nein         | Trainingsdetails, Profil bearbeiten, Konto löschen |
+| Admin/Sportler | JWT, `role = admin` | Ja           | Zusätzlich Raceplan-CRUD, Strava-Sync-Button       |
+
+
+*Tabelle 6.5 – Rollen und Berechtigungen*
+
+#### Admin-Erkennung
+
+Die SQL-Funktion `public.is_admin()` (in `rls-races.sql`) prüft, ob der aktuelle Auth-User in `profiles` den Wert `role = 'admin'` hat:
+
+```sql
+select exists (
+  select 1 from public.profiles
+  where id = auth.uid() and role = 'admin'
+);
+```
+
+Die Function ist `security definer` und für `authenticated` ausführbar. Im Frontend rufen `Raceplan.jsx` und `Activities.jsx` `supabase.rpc('is_admin')` auf, um Admin-UI-Elemente ein- oder auszublenden.
+
+**Wichtig:** Die Admin-Rolle wird **nicht** bei der Registrierung vergeben, sondern manuell im Supabase Dashboard von der Entwicklerin gesetzt (vgl. Abschnitt 4.2).
+
+### 6.5 Row Level Security (RLS)
+
+RLS ist das **zentrale Sicherheitsinstrument** der Anwendung (NF4). Auf den relevanten Tabellen ist RLS aktiviert; Policies definieren, welche SQL-Operationen für welche Rolle erlaubt sind.
+
+#### Übersicht der Policies
+
+
+| Tabelle / View               | Operation                | Wer             | Policy / Regel                             |
+| ---------------------------- | ------------------------ | --------------- | ------------------------------------------ |
+| `profiles`                   | SELECT                   | `authenticated` | Alle Profile lesbar (für Username-Anzeige) |
+| `profiles`                   | UPDATE                   | `authenticated` | Nur eigene Zeile: `auth.uid() = id`        |
+| `races`                      | SELECT                   | Alle            | `using (true)` — öffentlicher Raceplan     |
+| `races`                      | INSERT / UPDATE / DELETE | Admin           | `is_admin()`                               |
+| `strava_activities_overview` | SELECT                   | Alle            | `using (true)` — nur reduzierte Spalten    |
+| `strava_activities`          | SELECT                   | `authenticated` | Volle Trainingsdetails                     |
+
+
+*Tabelle 6.6 – RLS-Policies*
+
+#### View als Datenschutz-Schicht
+
+Gäste sollen Trainings **sehen**, aber nicht alle Leistungswerte. Statt die Volltabelle `strava_activities` freizugeben, existiert die View `strava_activities_overview` mit ausschliesslich: `id`, `name`, `distance`, `moving_time`, `total_elevation_gain`, `sport_type`, `start_date_local` (vgl. `rls-activities.sql`).
+
+Damit werden Herzfrequenz, Watt, Polyline und `raw_data` auf Datenbankebene vor Gästen verborgen — unabhängig davon, ob das Frontend eine Detailroute anbietet.
+
+#### SQL-Funktionen mit erhöhten Rechten
+
+
+| Function               | Typ                          | Zweck                         | Absicherung                                |
+| ---------------------- | ---------------------------- | ----------------------------- | ------------------------------------------ |
+| `handle_new_user()`    | Trigger, `security definer`  | Profil bei Signup anlegen     | Nur via Auth-Trigger aufrufbar             |
+| `is_admin()`           | SQL, `security definer`      | Admin-Prüfung für RLS und RPC | Liest nur `profiles.role` für `auth.uid()` |
+| `delete_own_account()` | PL/pgSQL, `security definer` | Konto löschen                 | Prüft `auth.uid()`; nur `authenticated`    |
+
+
+### 6.6 Schutz sensibler Daten und Secrets
+
+#### Klassifikation
+
+
+| Daten                           | Sensibilität | Speicherort                          | Client-Zugriff                      |
+| ------------------------------- | ------------ | ------------------------------------ | ----------------------------------- |
+| Benutzer-Passwort               | Hoch         | Supabase Auth (gehasht)              | Nie im Klartext gespeichert         |
+| JWT Session                     | Mittel       | Browser                              | Nur Anon-Key + User-JWT im Frontend |
+| Strava Access/Refresh Token     | Hoch         | `strava_connection`                  | Nur Edge Functions (Service Role)   |
+| Strava Client Secret            | Hoch         | Edge-Function-Secrets                | Nicht im Frontend                   |
+| Service Role Key                | Sehr hoch    | Edge-Function-Umgebung (automatisch) | Nicht im Frontend                   |
+| Trainings-Rohdaten (`raw_data`) | Mittel       | `strava_activities`                  | Nur `authenticated`                 |
+
+
+*Tabelle 6.7 – Datenklassifikation*
+
+#### Frontend-Umgebungsvariablen
+
+In `webpage-jabra/.env.local` (via `.gitignore` ausgeschlossen) stehen ausschliesslich **öffentliche** Supabase-Keys:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY` (Anon Key)
+- `VITE_API_URL` (Projekt-URL für Edge-Function-Aufrufe)
+
+Der **Service Role Key** und das **Strava Client Secret** werden bewusst nicht im React-Code verwendet.
+
+#### Edge-Function-Secrets
+
+Im Supabase Dashboard unter *Edge Functions → Secrets* gesetzt:
+
+
+| Secret                 | Gesetzt  | Anmerkung                                    |
+| ---------------------- | -------- | -------------------------------------------- |
+| `STRAVA_CLIENT_ID`     | Ja       | Für Token-Refresh und API-Aufrufe            |
+| `STRAVA_CLIENT_SECRET` | Ja       | Niemals im Repository                        |
+| `STRAVA_VERIFY_TOKEN`  | **Nein** | Webhook nicht produktiv (vgl. Abschnitt 4.4) |
+
+
+#### Repository und Abgabe
+
+- `.env.local` ist in `.gitignore` (`*.local`) und wird für die Modul-Abgabe **separat** übermittelt.
+- SQL-Skripte und Edge-Function-Referenzen im Repo enthalten **keine** produktiven Secrets.
+
+### 6.7 Strava-Integration und Edge Functions
+
+Die Strava-Anbindung ist sicherheitskritisch, weil OAuth-Tokens weitreichenden API-Zugriff erlauben.
+
+#### Architekturprinzipien
+
+
+| Prinzip                                  | Umsetzung                                                                   |
+| ---------------------------------------- | --------------------------------------------------------------------------- |
+| Kein direkter Browser-Zugriff auf Strava | Alle API-Calls in Edge Functions                                            |
+| Token-Speicherung serverseitig           | Tabelle `strava_connection`, Zugriff über Service Role                      |
+| Token-Refresh serverseitig               | In `sync-strava-activities` inline; optional `strava_sync`                  |
+| Manueller Sync statt Webhook             | Reduziert Angriffsfläche (kein öffentlicher Webhook-Endpoint in Produktion) |
+
+
+#### Produktive Function `sync-strava-activities`
+
+- Verwendet **Service Role Key** für DB-Zugriff (umgeht RLS für UPSERT in `strava_activities`).
+- Liest Strava-Credentials aus der Function-Umgebung, nicht aus Client-Requests.
+- Wird vom Frontend per POST mit Session-JWT aufgerufen; CORS-Header erlauben Browser-Requests.
+
+**Hinweis:** Die Function prüft derzeit **nicht** serverseitig, ob der Aufrufer Admin ist (vgl. Abschnitt 6.10). Der Schutz beruht vorläufig auf der UI (Button nur für Admin sichtbar).
+
+### 6.8 Frontend-Sicherheit
+
+Das Frontend ergänzt RLS, ersetzt es aber nicht.
+
+#### Geschützte Routen
+
+`ProtectedRoute.jsx` prüft `isAuthenticated` aus dem `AuthContext`. Ohne Session erfolgt Redirect zu `/login` mit Rückkehr-Information (`state.from`). Geschützt sind:
+
+- `/activities/:id` — Trainingsdetails
+- `/profile` — Profilverwaltung
+
+Vitest-Tests (AT-13 bis AT-15) prüfen Redirect, Zugriff mit Session und Loading-Zustand.
+
+#### Bedingte UI-Elemente
+
+
+| Element                  | Bedingung             | Komponente       |
+| ------------------------ | --------------------- | ---------------- |
+| Trainingskarte klickbar  | `isAuthenticated`     | `Activities.jsx` |
+| Hinweis «Melde dich an…» | Nicht eingeloggt      | `Activities.jsx` |
+| Raceplan CRUD-Buttons    | `is_admin() === true` | `Raceplan.jsx`   |
+| «Strava synchronisieren» | Eingeloggt und Admin  | `Activities.jsx` |
+
+
+#### Clientseitige Validierung
+
+Formulare (Login, Signup, Raceplan, Profil) nutzen HTML5-Validierung und zusätzliche Checks (z. B. Mindestlänge Benutzername). Diese Validierung dient der **Benutzerführung** (NF7), nicht der Autorisierung — die wird durch RLS erzwungen.
+
+#### Storage
+
+Bilder auf Home und About werden aus dem öffentlichen Bucket `images` geladen (`getPublicUrl`). Es werden aktuell keine user-spezifischen Uploads durch Endbenutzer unterstützt; der Bucket enthält nur statische Medien des Sportlers.
+
+### 6.9 Sicherheitsprüfung
+
+Die Sicherheitsmassnahmen wurden in **AP7** manuell und teilweise automatisiert geprüft (vgl. Kapitel 5).
+
+#### Automatisierte Tests
+
+- `ProtectedRoute.test.jsx` — Auth-Guard (3 Tests, bestanden)
+- RLS, RPC `delete_own_account` und Edge Functions bewusst **nicht** automatisiert (vgl. Abschnitt 5.7.3)
+
+#### Behobene Sicherheits-relevante Fehler
+
+
+| Problem                                  | Fix                                                |
+| ---------------------------------------- | -------------------------------------------------- |
+| Gäste sahen Trainingsübersicht nicht     | SELECT-Policy auf View ergänzt                     |
+| User konnten Races anlegen               | Admin-Prüfung via `is_admin()` in RLS              |
+| Raceplan UPDATE/DELETE blockiert         | Fehlende Policies in `rls-races.sql` nachgezogen   |
+| Frontend meldete Erfolg trotz RLS-Fehler | `.select()` und Fehlerbehandlung in `Raceplan.jsx` |
+
+
 ---
 
 ## 7. Fazit
 
+Das Modulprojekt **210 – Public Cloud** wurde als Fullstack-Webapplikation mit Supabase-Backend, React-Frontend und Strava-Integration umgesetzt. Ziel war ein professioneller Sportler-Auftritt für den Auftraggeber Jan Brawand — mit öffentlichen Informationsseiten, rollenbasierter Trainingsdetailansicht und Admin-Verwaltung des Raceplans.
+
+**Gesamteinschätzung:** Mit dem Ergebnis bin ich im Grossen und Ganzen **sehr zufrieden**. Die Kernfunktionen konnte ich ohne grössere Probleme und mit wenig Hilfe umsetzen, der Auftraggeber konnte die Anwendung in der Abnahme testen und  nutzen, und die technischen Modulanforderungen (Cloud-Backend, Auth, RLS, externe API, CRUD, Deployment, CI) sind nachweisbar umgesetzt.
+
+**Zeitplan:** Trotz sorgfältiger Vorbereitung (User Stories, Arbeitspakete, Datenmodell) wurden die geplanten Stunden in einigen Arbeitspaketen überschritten — vor allem **AP4 (Strava)** mit 12,75 h statt 8 h und **AP5 (Frontend)** mit 11 h statt 8 h (vgl. Abschnitt 3.1). Bis zur Dokumentation wurden rund **41 h** protokolliert. Die Überschreitung war vor allem auf OAuth-Troubleshooting, Webhook-Versuche und RLS-Nacharbeiten zurückzuführen, nicht auf fehlende Planung.
+
+**Learnings:** Das Projekt lieferte viele praxisnahe Erfahrungen: OAuth-Anbindung an Strava, Umgang mit Webhooks (auch wenn der produktive Einsatz scheiterte), ein neues Backend-Tool (Supabase), GitHub Actions, Deployment-Abläufe und die Zusammenarbeit mit RLS auf Datenbankebene. Ich bin zuversichtlich, den Strava-Webhook nach der Abgabe noch produktiv umsetzen zu können.
+
+**IPA-Vorbereitung:** Bewusst wurde das Projekt so realitätsnah wie möglich angelegt — mit Auftraggebergespräch, Abnahmetests, Git-Workflow, CI und ausführlicher Dokumentation. Das entspricht dem Ablauf einer IPA und hat mir gezeigt, wo ich bei Zeitplanung und technischen Sackgassen noch nachlegen muss.
+
+#### Zielerreichung (kritischer Überblick)
+
+
+| Erfolgskriterium (Abschnitt 1.2)                       | Erreicht? | Anmerkung                                                |
+| ------------------------------------------------------ | --------- | -------------------------------------------------------- |
+| Gäste nutzen Home, About, Raceplan, Trainingsübersicht | Ja        | Abnahmetests T-01 bis T-09 OK                            |
+| User sehen Trainingsdetails und verwalten Profil       | Ja        | T-13 bis T-19 OK                                         |
+| Sportler verwaltet Raceplan per CRUD                   | Ja        | T-20 bis T-25 OK (nach RLS-Fix)                          |
+| Strava-Aktivitäten synchronisiert und angezeigt        | Ja        | Manueller Sync per Admin-Button, kein Webhook            |
+| Berechtigungen durch RLS und Routing                   | Ja        | RLS auf Kerntabellen; einzelne Grenzen in Abschnitt 6.10 |
+| Responsives Verhalten                                  | Teilweise | T-42 offen; Header-Fix am 25.06. nachgezogen             |
+
+
+*Tabelle 7.1 – Zielerreichung*
+
 ### 7.1 Das lief gut
+
+#### Supabase als Backend
+
+Die Einrichtung des Supabase-Backends über das **Dashboard** (ohne CLI) empfand ich als **sehr intuitiv**. Tabellen, RLS-Policies, Storage-Bucket `images`, Authentication und Edge Functions liessen sich schrittweise aufbauen, ohne ein separates Server-Backend betreiben zu müssen. Besonders hilfreich war die Kombination aus PostgreSQL, Auth und RLS in einer Plattform — passend zum Cloud-Fokus des Moduls.
+
+#### React-Frontend
+
+Das **Grundgerüst** der React-SPA (Vite, Routing, Layout, AuthContext) liess sich dank Erfahrung aus früheren Projekten **schnell** erstellen. Seiten, Formulare und die Auslagerung von Logik in `utils/` machten den Code wartbar. Unit-Tests mit Vitest (34 Tests, alle bestanden) sichern zentrale Hilfsfunktionen und den `ProtectedRoute`-Guard ab.
+
+#### Deployment
+
+Das **Frontend-Deployment** (Production-Build mit `npm run build`, statisches Hosting) hat **auf Anhieb** funktioniert. Das Supabase-Backend wurde parallel im Dashboard deployed (SQL Editor, Edge Functions, Secrets). Die Deployment-Optionen sind in Abschnitt 4.6 dokumentiert.
+
+#### GitHub Actions
+
+Die Einrichtung von **GitHub Actions** war zwar nicht beim ersten Versuch erfolgreich — die ersten drei Workflow-Läufe scheiterten nacheinander an:
+
+1. falschem Projektordner und Version (`webapp-jabra` statt `webpage-jabra`, Version 24.x statt 22.x),
+2. fehlendem npm-Cache-Pfad (`cache-dependency-path` für `package-lock.json`),
+3. hängendem `npm test` (Vitest Watch-Modus in CI),
+
+— aber nach diesen Korrekturen lief der Workflow **grün** (Build + `npm run test:run` bei Push/PR auf `main`). Das entspricht dem Bewertungskriterium «funktionale Git Actions» und war ein wertvolles Learning für die IPA.
+
+#### Weitere positive Aspekte
+
+
+| Bereich                   | Was gut funktionierte                                                        |
+| ------------------------- | ---------------------------------------------------------------------------- |
+| Anforderungsanalyse       | User Stories US1–US11 mit Akzeptanzkriterien; klare Rollentrennung           |
+| Abnahme                   | Zwei Testrunden mit Auftraggeber; Feedback eingearbeitet wo sinnvoll         |
+| Sicherheit                | RLS als zentrales Instrument; Trainingsdetails über View für Gäste reduziert |
+| Pragmatische Entscheidung | Manueller Strava-Sync statt blockierender Webhook — Feature trotzdem nutzbar |
+| Dokumentation & Journal   | Fortlaufendes Arbeitsjournal mit Ist-Zeiten pro Arbeitspaket                 |
+
 
 ### 7.2 Da gab es Probleme
 
-### 7.3 Bewertungsraster
+Neben den erfolgreichen Bereichen gab es mehrere **zeitintensive Stolpersteine**. Die wichtigsten:
+
+#### Strava-Webhook und OAuth (AP4)
+
+Der **nicht funktionierende Webhook** hat mich am meisten Zeit gekostet (über 12 h in AP4). Strava-Test-Events lieferten wiederholt keine erwarteten Ergebnisse («Not create activities»), obwohl neue Aktivitäten auf Strava vorhanden waren. Statt länger in der Sackgasse zu bleiben, hätte ich **früher eine alternative Lösung** suchen sollen — was ich schliesslich mit dem Admin-Button und der Edge Function `sync-strava-activities` getan habe.
+
+Auch die **OAuth-Einrichtung** brauchte drei Anläufe (falscher Token-Request, zu enger Scope, dann erfolgreich). Das war lehrreich, kostete aber planbare Zeit.
+
+**Learning:** Bei unklaren externen APIs früher einen Minimal-Pfad wählen (manueller Sync), Webhook als Stretch Goal behandeln.
+
+#### Rollenunterschied bei Activities
+
+Die **Unterscheidung zwischen Gast- und User-Ansicht** bei den Trainings war technisch und konzeptionell anspruchsvoll:
+
+- Gäste sollen die Übersicht sehen, aber **keine Details** (F16).
+- Eingeloggte User sollen zur Detailseite navigieren können.
+
+Das erforderte die View `strava_activities_overview`, geschützte Route `/activities/:id`, bedingtes Klick-Verhalten in `Activities.jsx` und passende RLS-Policies. Die **SELECT-Policy auf der View** war anfangs ein Problem — die Trainingsliste blieb für Gäste leer, bis die Policy `using (true)` ergänzt wurde (vgl. Arbeitsjournal 20.06.). Rückblickend war das ein zentrales Learning zu **Views und RLS in Supabase**.
+
+#### Bilder und Storage-Pfade
+
+**Pfadprobleme bei Bildern** im Frontend kosteten unnötig Zeit: Die Bilder aus Supabase Storage waren zunächst nicht sichtbar, obwohl der Code korrekt war — der **Storage-Pfad** in der Konfiguration stimmte nicht (vgl. Arbeitsjournal 19.06.). Nach Korrektur funktionierten Home und About wie geplant.
+
+#### RLS und Raceplan-CRUD
+
+Mehrere **RLS-Probleme** tauchten erst in der Testphase auf:
+
+
+| Problem                                       | Auswirkung                 | Lösung                             |
+| --------------------------------------------- | -------------------------- | ---------------------------------- |
+| Fehlende Policies nach Tabellen-Neuerstellung | Leere Activities-Liste     | Policies im Dashboard nachziehen   |
+| User konnten Races anlegen                    | Keine echte Admin-Trennung | `is_admin()` in RLS                |
+| UPDATE/DELETE auf `races` blockiert           | T-23/T-25 zunächst NOK     | `rls-races.sql` idempotent ergänzt |
+| Frontend meldete Erfolg trotz RLS-Fehler      | Irreführende UX            | `.select()` in `Raceplan.jsx`      |
+
+
+Diese Fehler zeigen: **RLS-Policies müssen vollständig deployed sein**, bevor die UI als «fertig» gilt — und das Frontend darf DB-Fehler nicht verschlucken.
+
+#### Weitere offene oder nachgelagerte Punkte
+
+
+| Thema                                                                    | Status                                                 |
+| ------------------------------------------------------------------------ | ------------------------------------------------------ |
+| Responsiver Test T-42 (Mobile)                                           | Noch nicht abgeschlossen; Header-Anpassung am 25.06.   |
+| UX-Feedback Abnahme (Sortierung Raceplan, Hinweistext, Formularposition) | Bewusst nicht mehr geändert — Kernfunktion priorisiert |
+| Edge Function ohne serverseitigen Admin-Check                            | Dokumentiert in Abschnitt 6.10                         |
+| Geschwindigkeitsberechnung Activity Details                              | In erster Abnahme fehlerhaft; später behoben           |
+
+
+#### Zeitliche Bilanz
+
+
+| Arbeitspaket    | Soll (h) | Ist (h) | Abweichung                       |
+| --------------- | -------- | ------- | -------------------------------- |
+| AP4 Strava      | 8        | 12,75   | +4,75 h (Webhook, OAuth, CORS)   |
+| AP5 Frontend    | 8        | 11      | +3 h (CSS, Details, Sync-Button) |
+| AP2 Architektur | 3        | 2       | −1 h                             |
+| AP3 Backend     | 8        | 6,25    | −1,75 h                          |
+
+
+Die Mehrzeit in Strava und Frontend wurde nur teilweise durch Einsparungen in anderen Paketen kompensiert. Für die IPA werde ich bei **externen Integrationen** grosszügigere Puffer einplanen.
+
+### 7.3 Bewertungsraster (vorgegeben)
 
 **Anweisungen**
 
@@ -1375,19 +1922,21 @@ Wichtig: Sind die Commit-Logs nicht plausibel, kann die Arbeit als Plagiat gewer
 
 Bewertungsraster: Arztzeugnis bei NHP
 
-| Bewertungskirterium | Mögliche Punkte |
-| ------------------- | --------------- |
-| Projektpitch       | 2p              |
-| User Stories mit Akzeptanzkriterien | 2p |
-| Arbeitsplan mit sinnvoll detailierten Arbeitsschritten und Zeitschätzung | 2p |
-| effektive Arbeitszeit je Arbeitspaket protokolliert | 2p |
-| vollendeter git merge request | 2p |
-| funktionale git actions | 2p |
-| auth korrekt eingesetzt | 2p |
-| CRUD OPs | 4p |
-| Architektur dokumentiert | 2p |
-| Deployment-Optionen dokumentiert | 2p |
-| kritischer Review: welche Ziele wurden erreicht oder auch nicht | 2p |
+
+| Bewertungskirterium                                                      | Mögliche Punkte |
+| ------------------------------------------------------------------------ | --------------- |
+| Projektpitch                                                             | 2p              |
+| User Stories mit Akzeptanzkriterien                                      | 2p              |
+| Arbeitsplan mit sinnvoll detailierten Arbeitsschritten und Zeitschätzung | 2p              |
+| effektive Arbeitszeit je Arbeitspaket protokolliert                      | 2p              |
+| vollendeter git merge request                                            | 2p              |
+| funktionale git actions                                                  | 2p              |
+| auth korrekt eingesetzt                                                  | 2p              |
+| CRUD OPs                                                                 | 4p              |
+| Architektur dokumentiert                                                 | 2p              |
+| Deployment-Optionen dokumentiert                                         | 2p              |
+| kritischer Review: welche Ziele wurden erreicht oder auch nicht          | 2p              |
+
 
 Ohne Arztzeugnis keine NHP.
 
@@ -1396,3 +1945,37 @@ Zusatz, z.B.:
 1p file upload etc (nach Vereinbarung)
 
 Abzugeben ist der für mich erreichbare Github Link mit README (oder alternativ PDF-Doku) sowie zum Nachvollziehen das .env file (mit den secrets)
+
+### 7.4 Quellen
+
+**Supabase**
+* [Youtoube Supabase Full Course](https://www.youtube.com/watch?v=kyphLGnSz6Q&t=971s)
+* [Supabase Docs](https://supabase.com/docs)
+
+**Strava**
+* [Strava for developers](https://developers.strava.com/)
+
+### 7.5 KI als Hilfsmittel
+
+Im Projekt wurde die KI-Funktion von **Cursor** gezielt als Hilfsmittel eingesetzt — nicht zur vollständigen Codegenerierung, sondern dort, wo komplexere UI- oder API-Logik Zeit sparen sollte (Karte, Formatierungen, Tests, Edge Functions). Eigenständig umgesetzt wurden das Supabase-Backend, die Authentifizierung und das Grundgerüst des React-Frontends; KI-generierte Teile wurden stets geprüft, angepasst und in den bestehenden Code integriert. Die folgende Übersicht unterscheidet nach vollständig KI-erstelltem Code, teilweise ergänztem Code und ohne KI-Unterstützung entwickelten Bereichen.
+
+**komplett von KI-Tools generiert**:
+
+* Leaflet-Karte (`ActivityMap.jsx`) und Polyline-Dekodierung (`utils/map.js`) mit `summary_polyline`
+* Umrechnungen und Stat-Gruppen in `utils/activityDetails.js` (Bewegungszeit, Geschwindigkeit, Pace, Kalorien usw.)
+* Vitest-Unit-Tests (`tests/utils/`, `ProtectedRoute.test.jsx`)
+
+**teilweise mit KI ergänzt**:
+
+* Supabase Edge Functions (Strava-OAuth, Sync, Webhook) — Grundgerüst mit KI; OAuth-Flow war bereits manuell vorhanden
+* CSS (`src/css/*.css`) und responsives Verhalten
+* View `strava_activities_overview` (SQL in `rls-activities.sql`, Anbindung in `Activities.jsx`)
+* Code-Review und Bugfixes nach KI-gestütztem Review (u. a. Raceplan `.select()`)
+
+**ohne KI-Tools**:
+
+* Aufbau Supabase-Backend (Tabellen, RLS-Policies, Storage)
+* Grundgerüst React-Frontend (Vite-Init, Routing, Layout, Home, Login, Signup, About, Activities)
+* Authentifizierung (`AuthContext`, `ProtectedRoute`)
+* Raceplan-CRUD (`Raceplan.jsx`, `utils/raceplan.js`)
+* Datenmodell, Architektur und Projektplanung

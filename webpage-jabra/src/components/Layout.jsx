@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Outlet, Link } from 'react-router-dom'
 import { supabase } from '../supabase-client'
 import { useNavigate } from 'react-router-dom'
@@ -8,31 +9,44 @@ import '../css/Layout.css'
 export default function Layout() {
     const { session, username } = useAuth()
     const navigate = useNavigate()
+    const [menuOpen, setMenuOpen] = useState(false)
+
+    const closeMenu = () => setMenuOpen(false)
 
     const handleLogout = async () => {
         await supabase.auth.signOut()
+        closeMenu()
     }
 
     return (
         <div className="layout-container">
             <header className="layout-header">
-                <img src={logo} alt="Logo" onClick={() => navigate('/')} className='layout-header-logo' />
-                <nav className='layout-header-nav'>
-                   <Link to="/">Home</Link>
-                   <Link to="/about">About</Link>
-                   <Link to="/raceplan">Raceplan</Link>
-                   <Link to="/activities">Activities</Link>
+                <img src={logo} alt="Logo" onClick={() => { navigate('/'); closeMenu() }} className='layout-header-logo' />
+                <button
+                    type="button"
+                    className="layout-header-menu-btn"
+                    aria-label={menuOpen ? 'Menü schliessen' : 'Menü öffnen'}
+                    aria-expanded={menuOpen}
+                    onClick={() => setMenuOpen((open) => !open)}
+                >
+                    <span className="layout-header-menu-icon" aria-hidden="true" />
+                </button>
+                <nav className={`layout-header-nav${menuOpen ? ' layout-header-nav--open' : ''}`}>
+                   <Link to="/" onClick={closeMenu}>Home</Link>
+                   <Link to="/about" onClick={closeMenu}>About</Link>
+                   <Link to="/raceplan" onClick={closeMenu}>Raceplan</Link>
+                   <Link to="/activities" onClick={closeMenu}>Activities</Link>
                    {session ? (
                     <>
                         {username && (
-                            <Link to="/profile" className="layout-header-username">{username}</Link>
+                            <Link to="/profile" className="layout-header-username" onClick={closeMenu}>{username}</Link>
                         )}
                         <button type="button" onClick={handleLogout} className="layout-header-logout-button">Logout</button>
                     </>
                    ) : (
                     <>
-                        <Link to="/login">Login</Link>
-                        <Link to="/signup">Signup</Link>
+                        <Link to="/login" onClick={closeMenu}>Login</Link>
+                        <Link to="/signup" onClick={closeMenu}>Signup</Link>
                     </>
                    )}
                 </nav>
