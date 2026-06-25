@@ -3,9 +3,6 @@ import { supabase } from '../supabase-client'
 import { athlete } from '../config/athlete'
 import '../css/Home.css'
 
-const portfolioDescription =
-    `${athlete.firstName} ${athlete.lastName} is a professional triathlete who has been competing in the sport for over 10 years. He is known for his strong performance in long-distance triathlons and his dedication to training and racing.`
-
 function getImageUrl(path) {
     return supabase.storage.from('images').getPublicUrl(path).data.publicUrl
 }
@@ -14,21 +11,21 @@ const portfolioItems = [
     {
         number: '01',
         title: `Athlete Profile: ${athlete.firstName} ${athlete.lastName}`,
-        description: portfolioDescription,
+        description: `Vom Tennis und Unihockey zum Triathlon: Erfahre mehr über ${athlete.firstName}'s Werdegang, Motivation und seinen Weg zu ${athlete.goals}.`,
         href: '/about',
         imagePath: '/about/about.JPG',
     },
     {
         number: '02',
         title: 'Race Days',
-        description: portfolioDescription,
+        description: `Kommende Rennen und wichtige Etappen auf dem Weg zu ${athlete.goals} — von der Vorbereitung bis zum Fokus am Renntag.`,
         href: '/raceplan',
         imagePath: '/about/ap_ziel.JPG',
     },
     {
         number: '03',
         title: 'Training Journey',
-        description: portfolioDescription,
+        description: `Schwimmen, Radfahren und Laufen im Überblick — verfolge das Training, das die Grundlage für die Langdistanz-Leistung legt.`,
         href: '/activities',
         imagePath: '/about/race_day.JPG',
     },
@@ -45,7 +42,11 @@ export default function Home() {
                     <h1 className='home-section-title'>{athlete.goals}</h1>
                 </div>
                 <div className='home-section-image'>
-                    <img src={heroImageUrl} alt='Home' />
+                    <img
+                        className='home-portfolio-section-card-image home-portfolio-section-card-image--profile'
+                        src={heroImageUrl}
+                        alt={`${athlete.firstName} ${athlete.lastName}`}
+                    />
                 </div>
             </div>
 

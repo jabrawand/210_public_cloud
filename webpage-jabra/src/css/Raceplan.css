@@ -315,3 +315,11 @@
     opacity: 0.6;
     cursor: not-allowed;
 }
+
+@media (max-width: 768px) {
+    .raceplan-section-content {
+        width: min(100%, 640px);
+        padding: 0 1rem;
+        box-sizing: border-box;
+    }
+}

@@ -32,7 +32,7 @@ async function checkIsAdmin() {
 }
 
 async function syncStravaActivities(accessToken) {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+    const supabaseUrl = import.meta.env.VITE_API_URL
     const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 
     const response = await fetch(

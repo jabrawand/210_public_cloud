@@ -6,5 +6,5 @@ export const athlete = {
     hobbies: ['Sport', 'Reisen', 'Lesen', 'Familie & Freunde'],
     motivation: 'Meine eigenen Grenzen überschreiten',
     goals: 'Ironman Thun 2027',
-    sportiveHistory: 'Angefangen mit Tennis im Alter von 5 Jahren, danach Unihockey bis vor 2 Jahren.',
+    sportiveHistory: 'Angefangen mit Tennis im Alter von 6 Jahren, wechsel zu Unihockey mit 10 Jahren bis vor 2 Jahren. Seither trainiere ich für mein Ziel: Ironman Thun 2027.',
 }

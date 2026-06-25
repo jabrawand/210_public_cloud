@@ -223,6 +223,21 @@
 }
 
 @media (max-width: 540px) {
+    .activity-details-section-content {
+        width: min(100%, 640px);
+        padding: 0 1rem;
+        box-sizing: border-box;
+    }
+
+    .activity-details-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .activity-details-back-btn {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+    }
+
     .activity-details-stats-grid {
         grid-template-columns: 1fr;
     }
